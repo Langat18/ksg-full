@@ -2,44 +2,81 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-/* KSG Color System - Based on Screenshot */
+/* KSG Theme Colors */
 :root {
-  /* Primary KSG Brand Colors */
-  --ksg-primary: #1B4D3E;
-  --ksg-primary-light: #2E7D5A;
-  --ksg-primary-dark: #0F3329;
-  
-  /* Secondary Colors */
-  --ksg-accent: #8B4513;
-  --ksg-accent-light: #A0522D;
-  --ksg-gold: #FFD700;
-  
-  /* Kenya Colors */
-  --ksg-kenya-red: #CE1126;
-  --ksg-kenya-green: #006847;
-  --ksg-kenya-black: #000000;
-  
-  /* Neutral Colors */
-  --ksg-cream: #FEFEFE;
-  --ksg-light-gray: #F8F9FA;
-  
-  /* Gray Scale */
-  --ksg-gray-50: #F9FAFB;
-  --ksg-gray-100: #F3F4F6;
-  --ksg-gray-200: #E5E7EB;
-  --ksg-gray-300: #D1D5DB;
-  --ksg-gray-400: #9CA3AF;
-  --ksg-gray-500: #6B7280;
-  --ksg-gray-600: #4B5563;
-  --ksg-gray-700: #374151;
-  --ksg-gray-800: #1F2937;
-  --ksg-gray-900: #111827;
-  
-  /* Semantic Colors */
-  --ksg-success: #10B981;
-  --ksg-warning: #F59E0B;
-  --ksg-error: #EF4444;
-  --ksg-info: #3B82F6;
+  --color-ksg-gold: #B5955B;
+  --color-ksg-red: #FF0000;
+  --color-ksg-green: #008000;
+  --color-ksg-black: #000000;
+  --color-text: #1A1A1A;  /* Deep black for better readability */
+}
+
+/* Base text color for all elements */
+body {
+  color: var(--color-text);
+}
+
+/* Utility Classes */
+.btn-primary {
+  background-color: var(--color-ksg-gold);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  border: 2px solid var(--color-ksg-gold);
+  color: var(--color-ksg-gold);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-ksg-gold);
+  color: white;
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  border: 1px solid rgba(181, 149, 91, 0.2);
+  transition: all 0.2s;
+}
+
+.card:hover {
+  border-color: rgba(181, 149, 91, 0.4);
+}
+
+.input-field {
+  border: 2px solid #E5E7EB;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--color-ksg-gold);
+}
+
+.link {
+  color: var(--color-ksg-gold);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  transition: all 0.2s;
+}
+
+.link:hover {
+  color: var(--color-ksg-green);
+  text-decoration: underline;
 }
 
 /* Base Styles */

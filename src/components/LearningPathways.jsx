@@ -5,6 +5,11 @@ import { useAuth } from '../context/AuthContext';
 const LearningPathways = () => {
   const { user } = useAuth();
   const [selectedPathway, setSelectedPathway] = useState(null);
+  
+  // Styling constants
+  const cardStyle = 'bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 transition-all duration-300';
+  const headingStyle = 'text-2xl font-bold text-gray-900 mb-4';
+  const buttonStyle = 'bg-gray-900 hover:bg-gray-800 text-white font-medium px-4 py-2 rounded transition-colors';
 
   const pathways = [
     {
@@ -16,7 +21,7 @@ const LearningPathways = () => {
       stories: 5,
       completed: user ? 3 : 0,
       category: "Policy & Governance",
-      color: "from-blue-500 to-blue-700",
+      color: "from-ksg-gold to-ksg-goldDark",
       steps: [
         { id: 1, title: "The Foundation of Devolution", type: "video", duration: "15 min", completed: true },
         { id: 2, title: "County Government Structure", type: "audio", duration: "20 min", completed: true },

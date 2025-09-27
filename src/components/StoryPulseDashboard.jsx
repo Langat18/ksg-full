@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
 const StoryPulseDashboard = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  
   const [stats, setStats] = useState({
     totalStories: 47,
     totalPlays: 12450,
@@ -8,8 +10,6 @@ const StoryPulseDashboard = () => {
     activeUsers: 234,
     countiesCovered: 32
   });
-
-  const [isLoading, setIsLoading] = useState(true);
 
   // Mock data for visualizations
   const countiesData = [
@@ -24,10 +24,10 @@ const StoryPulseDashboard = () => {
   ];
 
   const hotTopics = [
-    { topic: 'Digital Governance', count: 15, trend: 'up' },
-    { topic: 'Climate Resilience', count: 12, trend: 'up' },
-    { topic: 'Healthcare Innovation', count: 10, trend: 'stable' },
-    { topic: 'Youth Empowerment', count: 8, trend: 'up' },
+    { topic: 'Digital Governance', count: 15, trend: 'up', color: 'from-ksg-gold to-ksg-goldDark' },
+    { topic: 'Climate Resilience', count: 12, trend: 'up', color: 'from-ksg-goldLight to-ksg-gold' },
+    { topic: 'Healthcare Innovation', count: 10, trend: 'stable', color: 'from-ksg-gold to-ksg-goldDark' },
+    { topic: 'Youth Empowerment', count: 8, trend: 'up', color: 'from-ksg-goldLight to-ksg-gold' },
     { topic: 'Water Management', count: 7, trend: 'down' },
     { topic: 'Education Reform', count: 6, trend: 'stable' }
   ];

@@ -20,22 +20,18 @@ const NavBar = () => {
   ];
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white border-b border-ksg-gold sticky top-0 z-50">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-24 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
+            <Link to="/" className="flex items-center space-x-5">
+              <img src="/assets/logo.png" alt="Logo" className="h-16 w-auto" />
               <div className="hidden sm:block">
-                <div className="text-xl font-bold text-gray-900">
+                <div className="text-xl font-bold text-[#1A1A1A]">
                   KSG Storytelling
                 </div>
-                <div className="text-xs text-gray-500 -mt-1">
+                <div className="text-xs text-[#1A1A1A] -mt-1">
                   Digital Narratives Platform
                 </div>
               </div>
@@ -48,7 +44,7 @@ const NavBar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`nav-link ${isActiveLink(link.path) ? 'active text-blue-600' : ''}`}
+                className={`nav-link ${isActiveLink(link.path) ? 'active text-ksg-gold font-bold' : 'text-[#1A1A1A] hover:text-ksg-gold'}`}
               >
                 {link.label}
               </Link>
