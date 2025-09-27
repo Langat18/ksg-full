@@ -1,0 +1,28 @@
+{
+  "stories": [
+    {
+      "id": 1,
+      "title": "Leadership in Action",
+      "description": "A story about leadership training at KSG.",
+      "created_at": "2025-01-01",
+      "published_at": "2025-01-02",
+      "author_name": "Jane Doe",
+      "media_url": "",
+      "transcript": "This is a transcript of the story."
+    },
+    {
+      "id": 2,
+      "title": "Digital Transformation",
+      "description": "How KSG embraced digital storytelling.",
+      "created_at": "2025-02-01",
+      "author_name": "John Smith",
+      "media_url": "",
+      "transcript": "Another transcript."
+    }
+  ],
+  "analytics": {
+    "total_stories": 2,
+    "total_views": 145,
+    "top_topic": "Leadership"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "/api/stories": "/stories",
+  "/api/stories/:id": "/stories/:id",
+  "/api/stories/:id/related": "/stories",
+  "/api/analytics/summary": "/analytics"
+}
