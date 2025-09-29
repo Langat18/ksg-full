@@ -1,6 +1,6 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* KSG Theme Colors */
 :root {
@@ -21,10 +21,52 @@ body {
   color: var(--color-text);
 }
 
-/* Custom Components */
 @layer components {
   .btn-primary {
     @apply bg-ksg-gold text-white px-4 py-2 rounded-lg transition-all duration-200;
+  }
+
+  .form-ksg-group {
+    @apply mb-6;
+  }
+
+  .form-ksg-label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+
+  .input-ksg {
+    @apply w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/20 bg-white focus:outline-none transition-all duration-200 text-gray-800 placeholder-gray-400;
+  }
+
+  .input-ksg:hover {
+    @apply border-[#235D4C]/30;
+  }
+
+  .focus-ksg:focus {
+    @apply border-[#B5955B] ring-1 ring-[#B5955B]/20 shadow-sm;
+  }
+
+  .form-ksg-help {
+    @apply mt-2 text-sm text-gray-500;
+  }
+
+  .btn-ksg-primary {
+    @apply px-6 py-3 bg-[#235D4C] text-white rounded-md font-medium hover:bg-[#2d7660] transform transition-all duration-300 hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#235D4C] focus:ring-offset-2;
+  }
+}
+
+@layer utilities {
+  /* File input styling */
+  .input-ksg[type='file'] {
+    @apply file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-[#235D4C] file:text-white hover:file:cursor-pointer hover:file:bg-[#2d7660] text-sm text-gray-500;
+  }
+
+  /* Select element styling */
+  select.input-ksg {
+    @apply appearance-none bg-no-repeat;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-size: 1.5em 1.5em;
   }
 }
 
@@ -95,6 +137,55 @@ body {
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Form Styles */
+.form-ksg-group {
+  @apply mb-6;
+}
+
+.form-ksg-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.input-ksg {
+  @apply w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/20 bg-white focus:outline-none transition-all duration-200;
+  @apply text-gray-800 placeholder-gray-400;
+}
+
+.input-ksg:hover {
+  @apply border-[#235D4C]/30;
+}
+
+.focus-ksg:focus {
+  @apply border-[#B5955B] ring-1 ring-[#B5955B]/20 shadow-sm;
+}
+
+.form-ksg-help {
+  @apply mt-2 text-sm text-gray-500;
+}
+
+  .btn-ksg-primary {
+    @apply px-6 py-3 bg-[#235D4C] text-white rounded-md font-medium;
+    @apply hover:bg-[#2d7660] transform transition-all duration-300;
+    @apply hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply focus:outline-none focus:ring-2 focus:ring-[#235D4C] focus:ring-offset-2;
+  }/* File input styling */
+input[type='file'].input-ksg {
+  @apply file:mr-4 file:py-2 file:px-4;
+  @apply file:rounded-md file:border-0;
+  @apply file:text-sm file:font-medium;
+  @apply file:bg-[#235D4C] file:text-white;
+  @apply hover:file:cursor-pointer hover:file:bg-[#2d7660];
+  @apply text-sm text-gray-500;
+}
+
+/* Select element styling */
+select.input-ksg {
+  @apply appearance-none bg-no-repeat;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-size: 1.5em 1.5em;
 }
 
 /* Typography */

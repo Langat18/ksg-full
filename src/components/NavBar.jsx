@@ -20,18 +20,18 @@ const NavBar = () => {
   ];
 
   return (
-    <header className="bg-ksg-primary sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto">
+    <header className="bg-[#235D4C] fixed top-0 left-0 right-0 z-[100] shadow-lg w-full h-16">
+      <div className="max-w-7xl mx-auto h-full">
         <div className="flex items-center justify-between h-16 px-4 lg:px-6">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-5">
               <img src="/assets/logo.png" alt="Logo" className="h-16 w-auto" />
               <div className="hidden sm:block">
-                <div className="text-xl font-bold text-[#1A1A1A]">
+                <div className="text-xl font-bold text-white">
                   KSG Storytelling
                 </div>
-                <div className="text-xs text-[#1A1A1A] -mt-1">
+                <div className="text-xs text-white/80 -mt-1">
                   Digital Narratives Platform
                 </div>
               </div>
@@ -44,7 +44,7 @@ const NavBar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`nav-link ${isActiveLink(link.path) ? 'text-ksg-white border-nav border-ksg-white' : 'text-ksg-white hover:border-nav hover:border-ksg-transparent-light'} px-nav py-2 text-nav font-normal transition-all duration-200`}
+                className={`nav-link ${isActiveLink(link.path) ? 'text-[#B5955B] border-b-2 border-[#B5955B]' : 'text-white hover:text-[#B5955B] hover:border-b-2 hover:border-[#B5955B]'} px-4 py-2 text-sm font-medium transition-all duration-300 ease-in-out hover:-translate-y-[1px]`}
               >
                 {link.label}
               </Link>
@@ -67,13 +67,13 @@ const NavBar = () => {
               <>
                 <button
                   onClick={logout}
-                  className="px-4 py-2 text-ksg-light hover:text-white border border-ksg-overlay hover:border-white rounded transition-all"
+                  className="px-4 py-2 text-[#B5955B] hover:bg-[#B5955B] hover:text-white border border-[#B5955B] rounded-md transition-all duration-300 ease-in-out hover:shadow-md hover:scale-105"
                 >
                   Logout
                 </button>
                 <Link
                   to="/dashboard"
-                  className="px-4 py-2 text-ksg-light hover:text-white border border-ksg-overlay hover:border-white rounded transition-all"
+                  className="px-4 py-2 text-[#B5955B] hover:bg-[#B5955B] hover:text-white border border-[#B5955B] rounded-md transition-all duration-300 ease-in-out hover:shadow-md hover:scale-105"
                 >
                   Dashboard
                 </Link>
@@ -81,7 +81,7 @@ const NavBar = () => {
             ) : (
               <Link
                 to="/login"
-                className="px-4 py-2 rounded-md border-2 border-ksg-gold text-ksg-gold hover:bg-ksg-gold hover:text-white transition-colors duration-200"
+                className="px-4 py-2 rounded-md border-2 border-[#B5955B] text-[#B5955B] hover:bg-[#B5955B] hover:text-white transition-all duration-300 ease-in-out hover:shadow-md hover:scale-105"
               >
                 Login
               </Link>
@@ -92,7 +92,7 @@ const NavBar = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900 transition-colors"
+              className="text-[#B5955B] hover:text-white focus:outline-none transition-colors"
             >
               <svg
                 className="h-6 w-6"
@@ -122,7 +122,7 @@ const NavBar = () => {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 bg-white">
+          <div className="md:hidden border-t border-gray-200 bg-white fixed top-16 left-0 right-0 shadow-lg z-[90]">
             <div className="px-4 py-3 space-y-3">
               {navLinks.map((link) => (
                 <Link

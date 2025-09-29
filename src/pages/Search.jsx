@@ -78,7 +78,7 @@ const Search = () => {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Discover Stories
           </h1>
-          <div className="text-ksg-gradient text-xl font-semibold mb-4">
+          <div className="text-[#B5955B] text-xl font-semibold mb-4">
             Explore Kenya's Knowledge Network
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -87,7 +87,7 @@ const Search = () => {
         </div>
 
         {/* Search Form */}
-        <div className="card-ksg-featured mb-8">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8 border-2 border-[#235D4C]/10 hover:border-[#235D4C]/20 transition-all duration-200">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Search Input - Fixed icon overlap */}
@@ -101,7 +101,7 @@ const Search = () => {
                     value={query} 
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search by keywords, people, places..."
-                    className="input-ksg input-ksg-with-icon focus-ksg"
+                    className="w-full pl-12 pr-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 placeholder-gray-400 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
                   />
                 </div>
               </div>
@@ -112,7 +112,7 @@ const Search = () => {
                 <select
                   value={category}
                   onChange={(e) => handleCategorySelect(e.target.value)}
-                  className="input-ksg focus-ksg"
+                  className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%23235D4C%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22M6%208l4%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[length:1.5em_1.5em] bg-[right_0.5rem_center]"
                 >
                   {categories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
@@ -126,7 +126,7 @@ const Search = () => {
               <button 
                 type="submit"
                 disabled={loading}
-                className="btn-ksg-primary"
+                className="inline-flex items-center px-6 py-3 bg-[#B5955B] text-white font-medium rounded-md hover:bg-[#B5955B]/90 focus:outline-none focus:ring-2 focus:ring-[#B5955B]/20 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {loading ? (
                   <>
@@ -155,13 +155,9 @@ const Search = () => {
                 onClick={() => handleCategorySelect(cat)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   category === cat
-                    ? 'bg-green-800 text-white shadow-md'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-green-50 hover:border-green-300'
+                    ? 'bg-[#B5955B] text-white shadow-md'
+                    : 'bg-white text-gray-700 border-2 border-[#B5955B]/30 hover:border-[#B5955B]/50 hover:bg-[#B5955B]/5'
                 }`}
-                style={{
-                  backgroundColor: category === cat ? 'var(--ksg-primary)' : undefined,
-                  borderColor: category !== cat ? 'var(--ksg-gray-300)' : undefined
-                }}
               >
                 {cat}
               </button>
@@ -230,11 +226,11 @@ const Search = () => {
                           setResults([]);
                           setSearchParams({});
                         }}
-                        className="btn-ksg-outline"
+                        className="px-6 py-3 border-2 border-[#B5955B] text-[#B5955B] font-medium rounded-md hover:bg-[#B5955B]/5 focus:outline-none focus:ring-2 focus:ring-[#B5955B]/20 focus:ring-offset-2 transition-all duration-200 shadow-sm"
                       >
                         Clear Search
                       </button>
-                      <Link to="/submit" className="btn-ksg-primary">
+                      <Link to="/submit"                       className="px-6 py-3 bg-[#B5955B] text-white font-medium rounded-md hover:bg-[#B5955B]/90 focus:outline-none focus:ring-2 focus:ring-[#B5955B]/20 focus:ring-offset-2 transition-all duration-200 shadow-sm">
                         Share Your Story
                       </Link>
                     </div>
@@ -247,8 +243,8 @@ const Search = () => {
 
         {/* Search Suggestions */}
         {!hasSearched && (
-          <div className="card-ksg text-center">
-            <svg className="mx-auto h-16 w-16 mb-6" style={{ color: 'var(--ksg-primary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-lg shadow-md p-8 text-center border-2 border-[#235D4C]/10 hover:border-[#235D4C]/20 transition-all duration-200">
+            <svg className="mx-auto h-16 w-16 mb-6 text-[#B5955B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Start Your Discovery</h3>
@@ -264,17 +260,7 @@ const Search = () => {
                     setQuery(term.toLowerCase());
                     performSearch(term.toLowerCase(), '');
                   }}
-                  className="p-3 rounded-lg font-medium transition-colors"
-                  style={{
-                    backgroundColor: 'rgba(27, 77, 62, 0.1)',
-                    color: 'var(--ksg-primary-dark)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'rgba(27, 77, 62, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'rgba(27, 77, 62, 0.1)';
-                  }}
+                  className="p-3 rounded-lg font-medium text-[#B5955B] bg-[#B5955B]/10 hover:bg-[#B5955B]/20 transition-all duration-200"
                 >
                   {term}
                 </button>

@@ -55,19 +55,19 @@ const UserDashboard = () => {
   };
 
   const getPointsColor = (points) => {
-    if (points >= 100) return 'text-purple-600';
-    if (points >= 50) return 'text-blue-600';
-    return 'text-green-600';
+    if (points >= 100) return 'text-[#B5955B]';
+    if (points >= 50) return 'text-[#235D4C]';
+    return 'text-[#235D4C]/80';
   };
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl text-white p-8">
+      <div className="bg-[#235D4C] rounded-xl text-white p-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
-            <p className="text-blue-100 text-lg">Level: {stats.level}</p>
+            <p className="text-white/80 text-lg">Level: {stats.level}</p>
           </div>
           <div className="mt-4 md:mt-0 text-center">
             <div className="text-4xl font-bold">{stats.totalPoints}</div>
@@ -77,13 +77,13 @@ const UserDashboard = () => {
         
         {/* Level Progress */}
         <div className="mt-6">
-          <div className="flex justify-between text-sm text-blue-200 mb-2">
+          <div className="flex justify-between text-sm text-white/70 mb-2">
             <span>Progress to next level</span>
             <span>{stats.nextLevelPoints} points to go</span>
           </div>
-          <div className="w-full bg-blue-800 rounded-full h-3">
+          <div className="w-full bg-[#235D4C]/20 rounded-full h-3">
             <div 
-              className="bg-yellow-400 h-3 rounded-full transition-all duration-500"
+              className="bg-[#B5955B] h-3 rounded-full transition-all duration-500"
               style={{ width: `${levelProgress}%` }}
             ></div>
           </div>
@@ -93,11 +93,11 @@ const UserDashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-blue-600 mb-1">{stats.storiesContributed}</div>
+          <div className="text-3xl font-bold text-[#235D4C] mb-1">{stats.storiesContributed}</div>
           <div className="text-gray-600 text-sm">Stories Shared</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-green-600 mb-1">{stats.storiesViewed}</div>
+          <div className="text-3xl font-bold text-[#235D4C] mb-1">{stats.storiesViewed}</div>
           <div className="text-gray-600 text-sm">Stories Viewed</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
@@ -120,12 +120,12 @@ const UserDashboard = () => {
                 key={index}
                 className={`p-4 rounded-lg border-2 text-center transition-all ${
                   badge.earned 
-                    ? 'border-blue-200 bg-blue-50' 
+                    ? 'border-[#B5955B] bg-[#B5955B]/5' 
                     : 'border-gray-200 bg-gray-50 opacity-60'
                 }`}
               >
                 <div className="text-2xl mb-2">{badge.icon}</div>
-                <div className={`font-medium text-sm ${badge.earned ? 'text-blue-900' : 'text-gray-600'}`}>
+                <div className={`font-medium text-sm ${badge.earned ? 'text-[#235D4C]' : 'text-gray-600'}`}>
                   {badge.name}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
@@ -156,7 +156,7 @@ const UserDashboard = () => {
           <div className="mt-4 pt-4 border-t">
             <Link 
               to="/submit" 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors text-center block"
+              className="w-full bg-[#B5955B] hover:bg-[#B5955B]/90 text-white py-2 px-4 rounded-lg font-medium transition-colors text-center block shadow-sm"
             >
               Share Another Story (+50 points)
             </Link>
@@ -183,11 +183,11 @@ const UserDashboard = () => {
           ))}
         </div>
         
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+        <div className="mt-6 p-4 bg-[#235D4C]/5 rounded-lg">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{impactData.length}</div>
-            <div className="text-sm text-blue-800">Counties Reached</div>
-            <p className="text-xs text-blue-700 mt-2">
+            <div className="text-2xl font-bold text-[#235D4C]">{impactData.length}</div>
+            <div className="text-sm text-[#235D4C]/80">Counties Reached</div>
+            <p className="text-xs text-[#235D4C]/70 mt-2">
               Your stories are connecting communities across Kenya!
             </p>
           </div>
@@ -195,7 +195,7 @@ const UserDashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg text-white p-6">
+      <div className="bg-[#B5955B] rounded-lg text-white p-6">
         <h2 className="text-xl font-bold mb-4">Ready for More Impact?</h2>
         <div className="grid md:grid-cols-3 gap-4">
           <Link 

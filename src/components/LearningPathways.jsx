@@ -121,21 +121,21 @@ const LearningPathways = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">
+            <div className="text-center p-4 bg-[#B5955B]/5 rounded-lg">
+              <div className="text-2xl font-bold text-[#B5955B]">
                 {pathways.reduce((acc, p) => acc + p.completed, 0)}
               </div>
-              <div className="text-sm text-blue-800">Stories Completed</div>
+              <div className="text-sm text-[#B5955B]/80">Stories Completed</div>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
+            <div className="text-center p-4 bg-[#235D4C]/5 rounded-lg">
+              <div className="text-2xl font-bold text-[#235D4C]">
                 {pathways.filter(p => p.completed === p.stories).length}
               </div>
-              <div className="text-sm text-green-800">Pathways Finished</div>
+              <div className="text-sm text-[#235D4C]/80">Pathways Finished</div>
             </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">150</div>
-              <div className="text-sm text-purple-800">Points Earned</div>
+            <div className="text-center p-4 bg-[#B5955B]/5 rounded-lg">
+              <div className="text-2xl font-bold text-[#B5955B]">150</div>
+              <div className="text-sm text-[#B5955B]/80">Points Earned</div>
             </div>
           </div>
         </div>
@@ -146,7 +146,7 @@ const LearningPathways = () => {
         {pathways.map((pathway) => (
           <div key={pathway.id} className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow">
             {/* Pathway Header */}
-            <div className={`bg-gradient-to-r ${pathway.color} text-white p-6`}>
+            <div className="bg-[#B5955B] text-white p-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
@@ -233,14 +233,14 @@ const LearningPathways = () => {
                       ) : user && index === pathway.completed ? (
                         <Link
                           to={`/story/${step.id}`}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                          className="bg-[#B5955B] hover:bg-[#B5955B]/90 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                         >
                           Continue
                         </Link>
                       ) : user && index < pathway.completed ? (
                         <Link
                           to={`/story/${step.id}`}
-                          className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                          className="text-[#B5955B] hover:text-[#B5955B]/80 font-medium text-sm"
                         >
                           Review
                         </Link>
@@ -273,7 +273,7 @@ const LearningPathways = () => {
                     ) : (
                       <Link
                         to={`/story/${pathway.steps[0].id}`}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                        className="bg-[#B5955B] hover:bg-[#B5955B]/90 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-sm"
                       >
                         Start Pathway
                       </Link>
@@ -298,16 +298,16 @@ const LearningPathways = () => {
       </div>
 
       {/* Call to Action */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl text-white p-8 text-center">
+      <div className="bg-[#B5955B] rounded-xl text-white p-8 text-center">
         <h2 className="text-2xl font-bold mb-4">Ready to Deepen Your Knowledge?</h2>
-        <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+        <p className="text-white/80 mb-6 max-w-2xl mx-auto">
           These carefully curated learning pathways help you understand complex topics 
           through real stories and experiences from across Kenya.
         </p>
         {!user && (
           <Link
             to="/login"
-            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
+            className="bg-white text-[#B5955B] px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-block shadow-sm border border-white/20"
           >
             Login to Track Your Progress
           </Link>

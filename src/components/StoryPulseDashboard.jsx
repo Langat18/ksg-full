@@ -84,7 +84,7 @@ const StoryPulseDashboard = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="text-center bg-gradient-to-r from-ksg-gold to-ksg-goldDark text-white rounded-xl p-8">
+      <div className="text-center bg-[#B5955B] text-white rounded-xl p-8">
         <h1 className="text-4xl font-bold mb-4">KSG Story Pulse</h1>
         <p className="text-xl text-white/90">Real-time insights into Kenya's knowledge network</p>
         <div className="mt-4 flex justify-center">
@@ -235,7 +235,7 @@ const StoryPulseDashboard = () => {
       </div>
 
       {/* Goal Progress */}
-      <div className="bg-gradient-to-r from-ksg-gold to-ksg-goldDark rounded-lg text-white p-8">
+      <div className="bg-[#B5955B] rounded-lg text-white p-8">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold mb-2">Platform Goals Progress</h2>
           <p className="text-green-100">Tracking our journey to connect Kenya's knowledge network</p>

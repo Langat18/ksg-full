@@ -59,7 +59,7 @@ const Login = () => {
       <div className="max-w-md w-full mx-auto">
         {/* KSG-Inspired Header */}
         <div className="text-center mb-8">
-          <div className="mx-auto h-20 w-20 hero-ksg-gradient rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-[#235D4C] to-[#B5955B] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
             <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
@@ -67,7 +67,7 @@ const Login = () => {
           <h2 className="text-4xl font-bold text-gray-900 mb-3">
             Welcome to KSG
           </h2>
-          <div className="text-ksg-gradient text-xl font-semibold mb-2">
+          <div className="text-[#B5955B] text-xl font-semibold mb-2">
             Digital Storytelling Platform
           </div>
           <p className="text-gray-600 leading-relaxed">
@@ -76,7 +76,7 @@ const Login = () => {
         </div>
 
         {/* KSG-Inspired Login Form */}
-        <div className="card-ksg-featured">
+        <div className="bg-white rounded-lg shadow-md p-8 border-2 border-[#235D4C]/10 hover:border-[#235D4C]/20 transition-all duration-200">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name Field */}
             <div className="form-ksg-group">
@@ -90,7 +90,7 @@ const Login = () => {
                 required
                 value={formData.name}
                 onChange={handleInputChange}
-                className="input-ksg focus-ksg"
+                className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 placeholder-gray-400 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
                 placeholder="Enter your full name"
               />
             </div>
@@ -107,10 +107,10 @@ const Login = () => {
                 required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="input-ksg focus-ksg"
+                className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 placeholder-gray-400 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
                 placeholder="name@organization.go.ke"
               />
-              <div className="form-ksg-help flex items-center mt-2">
+              <div className="mt-2 text-sm text-[#235D4C]/70 flex items-center">
                 <svg className="h-4 w-4 text-blue-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -128,14 +128,15 @@ const Login = () => {
                 name="role"
                 value={formData.role}
                 onChange={handleInputChange}
-                className="input-ksg focus-ksg"
+                className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%23235D4C%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22M6%208l4%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[length:1.5em_1.5em] bg-[right_0.5rem_center]"
               >
+                                className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%23235D4C%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22M6%208l4%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[length:1.5em_1.5em] bg-[right_0.5rem_center]">
                 <option value="">Select your role (optional)</option>
                 {roles.map(role => (
                   <option key={role} value={role}>{role}</option>
                 ))}
               </select>
-              <div className="form-ksg-help">
+              <div className="mt-2 text-sm text-[#235D4C]/70">
                 This helps us customize your platform experience
               </div>
             </div>
@@ -144,10 +145,10 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-4 px-6 border border-transparent rounded-lg shadow-md text-base font-semibold text-white transition-all duration-300 focus-ksg ${
+              className={`w-full flex justify-center py-4 px-6 border-2 border-transparent rounded-lg shadow-md text-base font-semibold text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 loading
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'btn-ksg-primary'
+                  : 'bg-[#B5955B] hover:bg-[#B5955B]/90 hover:border-[#235D4C]/50 focus:ring-[#B5955B]/20'
               }`}
             >
               {loading ? (
@@ -168,10 +169,10 @@ const Login = () => {
         </div>
 
         {/* KSG Platform Information */}
-        <div className="mt-8 card-ksg">
+        <div className="mt-8 bg-white rounded-lg shadow-sm p-6 border border-[#235D4C]/10">
           <div className="text-center">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center justify-center">
-              <svg className="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h3 className="font-semibold text-[#235D4C] mb-4 flex items-center justify-center">
+              <svg className="h-5 w-5 text-[#B5955B] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               Platform Features
@@ -213,8 +214,8 @@ const Login = () => {
           </p>
           <div className="flex items-center justify-center space-x-6">
             <div className="flex items-center space-x-2">
-              <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-gray-500 font-medium">Secure Platform</span>
+              <div className="h-3 w-3 bg-[#235D4C] rounded-full animate-pulse"></div>
+              <span className="text-xs text-[#235D4C]/70 font-medium">Secure Platform</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
