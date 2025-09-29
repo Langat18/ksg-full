@@ -1,0 +1,130 @@
+@layer components {
+  .btn-primary {
+    background-color: var(--color-ksg-gold);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.25rem;
+    border: none;
+    transition: background-color 200ms;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+  text-transform: none;
+  font-family: Helvetica, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-ksg-gold-dark);
+}
+
+/* Secondary Button Style */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-ksg-gold);
+  padding: 8px 20px;
+  border: 2px solid var(--color-ksg-gold);
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+  text-transform: none;
+  font-family: Helvetica, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-ksg-gold);
+  color: var(--color-white);
+}
+
+/* Dark Background Button */
+.dark-button {
+  background-color: var(--color-transparent-black);
+  color: var(--color-white);
+  padding: 8px 20px;
+  border: 1.5px solid var(--color-transparent-white);
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+  text-transform: none;
+  font-family: Helvetica, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.dark-button:hover {
+  background-color: var(--color-hover-black);
+  border-color: var(--color-white);
+}
+
+/* Navigation Link Style */
+.nav-link {
+  color: var(--color-white);
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.nav-link:hover {
+  color: var(--color-hover-white-alpha);
+}
+
+.nav-link.active {
+  font-weight: 500;
+}
+
+/* Link Style */
+.link {
+  color: var(--color-ksg-gold);
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.link:hover {
+  color: var(--color-ksg-gold-dark);
+  text-decoration: underline;
+}
+
+/* Form Input Style */
+.input-field {
+  border: 1px solid #E5E7EB;
+  border-radius: 0.375rem;
+  padding: 0.625rem 1rem;
+  width: 100%;
+  transition: all 0.2s ease-in-out;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--color-ksg-gold);
+  box-shadow: 0 0 0 1px var(--color-ksg-gold);
+}
+
+/* Disabled State */
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.dark-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Small Button */
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Large Button */
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+}
+}

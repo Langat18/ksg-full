@@ -20,9 +20,9 @@ const NavBar = () => {
   ];
 
   return (
-    <header className="bg-white border-b border-ksg-gold sticky top-0 z-50">
+    <header className="bg-ksg-primary sticky top-0 z-50">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between h-24 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 px-4 lg:px-6">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-5">
@@ -44,7 +44,7 @@ const NavBar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`nav-link ${isActiveLink(link.path) ? 'active text-ksg-gold font-bold' : 'text-[#1A1A1A] hover:text-ksg-gold'}`}
+                className={`nav-link ${isActiveLink(link.path) ? 'text-ksg-white border-nav border-ksg-white' : 'text-ksg-white hover:border-nav hover:border-ksg-transparent-light'} px-nav py-2 text-nav font-normal transition-all duration-200`}
               >
                 {link.label}
               </Link>
@@ -61,35 +61,27 @@ const NavBar = () => {
           </nav>
 
           {/* User Menu */}
+          {/* Action Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
-              <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2">
-                  <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-medium text-sm">
-                      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                    </span>
-                  </div>
-                  <div className="hidden lg:block">
-                    <div className="text-sm font-medium text-gray-900">
-                      {user.name}
-                    </div>
-                    {user.isAdmin && (
-                      <div className="text-xs text-blue-600">Admin</div>
-                    )}
-                  </div>
-                </div>
+              <>
                 <button
                   onClick={logout}
-                  className="text-sm text-gray-600 hover:text-red-600 font-medium transition-colors"
+                  className="px-4 py-2 text-ksg-light hover:text-white border border-ksg-overlay hover:border-white rounded transition-all"
                 >
                   Logout
                 </button>
-              </div>
+                <Link
+                  to="/dashboard"
+                  className="px-4 py-2 text-ksg-light hover:text-white border border-ksg-overlay hover:border-white rounded transition-all"
+                >
+                  Dashboard
+                </Link>
+              </>
             ) : (
               <Link
                 to="/login"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="px-4 py-2 rounded-md border-2 border-ksg-gold text-ksg-gold hover:bg-ksg-gold hover:text-white transition-colors duration-200"
               >
                 Login
               </Link>

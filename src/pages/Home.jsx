@@ -38,24 +38,29 @@ const Home = () => {
 
   return (
     <div className="space-y-16">
-      {/* KSG-Inspired Hero Section */}
-      <section className="hero-ksg-gradient text-white rounded-2xl overflow-hidden relative">
-        <div className="section-ksg-padding">
-          <div className="container-ksg-max">
+      {/* KSG Hero Section with Background Image */}
+      <section className="relative h-[600px] rounded-2xl overflow-hidden">
+        <img 
+          src="/assets/homepage.png" 
+          alt="KSG Homepage" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/40">
+          <div className="container-ksg-max h-full flex items-center">
             <div className="max-w-5xl mx-auto text-center animate-ksg-fade-in-up">
               <div className="mb-6">
-                <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
-                  <div className="h-2 w-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium mb-6 text-white">
+                  <div className="h-2 w-2 bg-ksg-gold rounded-full mr-2 animate-pulse"></div>
                   Kenya School of Government Digital Platform
                 </div>
               </div>
-              <h1 className="text-4xl md:text-6xl xl:text-7xl font-bold mb-8 leading-tight">
+              <h1 className="text-4xl md:text-6xl xl:text-7xl font-bold mb-8 leading-tight text-white">
                 Empowering Public Service Through 
-                <span className="block text-yellow-300 text-ksg-gradient mt-2">
+                <span className="block text-white mt-2">
                   Shared Stories
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-black mb-12 leading-relaxed max-w-4xl mx-auto">
+              <p className="text-xl md:text-2xl text-white/90 mb-12 leading-relaxed max-w-4xl mx-auto">
                 Discover multimedia narratives from KSG's community of leaders, showcasing 
                 innovation, policy impact, and transformational governance across all 47 counties.
               </p>
@@ -206,26 +211,32 @@ const Home = () => {
       </section>
 
       {/* KSG-Inspired Call to Action */}
-      <section className="hero-ksg-gradient text-white rounded-2xl overflow-hidden relative mx-4 sm:mx-6 lg:mx-8">
-        <div className="section-ksg-padding">
-          <div className="container-ksg-max">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="mb-6">
-                <svg className="mx-auto h-16 w-16 text-yellow-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-6">
-                Ready to Share Your Impact?
-              </h2>
-              <p className="text-xl md:text-2xl text-blue-100 mb-8 leading-relaxed">
+      <section className="relative text-white rounded-2xl overflow-hidden mx-4 sm:mx-6 lg:mx-8 py-20">
+        <img 
+          src="/assets/homepage.png" 
+          alt="KSG Call to Action" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/60">
+          <div className="relative z-10 h-full flex items-center">
+            <div className="container-ksg-max">
+              <div className="max-w-4xl mx-auto text-center">
+                <div className="mb-6">
+                  <svg className="mx-auto h-16 w-16 text-ksg-gold mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-bold mb-6">
+                  Ready to Share Your Impact?
+                </h2>
+              <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
                 Join KSG's knowledge network by sharing your experiences, innovations, 
                 and insights that are transforming communities across Kenya.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   to="/submit"
-                  className="btn-ksg-primary transform hover:scale-105 inline-flex items-center text-lg px-8 py-4"
+                  className="bg-ksg-gold hover:bg-ksg-goldDark text-white transform hover:scale-105 inline-flex items-center text-lg px-8 py-4 rounded-md transition-all duration-200"
                 >
                   <svg className="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -234,7 +245,7 @@ const Home = () => {
                 </Link>
                 <Link
                   to="/search"
-                  className="btn-ksg-secondary inline-flex items-center text-lg px-8 py-4"
+                  className="border-2 border-white hover:bg-white hover:text-ksg-gold text-white inline-flex items-center text-lg px-8 py-4 rounded-md transition-all duration-200"
                 >
                   <svg className="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V13a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -242,12 +253,11 @@ const Home = () => {
                   Browse Archive
                 </Link>
               </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
     </div>
   );
-};
-
-export default Home;
+};export default Home;

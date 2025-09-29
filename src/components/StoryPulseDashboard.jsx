@@ -84,9 +84,9 @@ const StoryPulseDashboard = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="text-center bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-xl p-8">
+      <div className="text-center bg-gradient-to-r from-ksg-gold to-ksg-goldDark text-white rounded-xl p-8">
         <h1 className="text-4xl font-bold mb-4">KSG Story Pulse</h1>
-        <p className="text-xl text-blue-100">Real-time insights into Kenya's knowledge network</p>
+        <p className="text-xl text-white/90">Real-time insights into Kenya's knowledge network</p>
         <div className="mt-4 flex justify-center">
           <div className="flex items-center space-x-2 bg-white/20 rounded-full px-4 py-2">
             <div className="h-2 w-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -98,7 +98,7 @@ const StoryPulseDashboard = () => {
       {/* Key Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-blue-600 mb-2">
+          <div className="text-3xl font-bold text-ksg-gold mb-2">
             {stats.totalStories.toLocaleString()}
           </div>
           <div className="text-gray-600 text-sm font-medium">Total Stories</div>
@@ -106,7 +106,7 @@ const StoryPulseDashboard = () => {
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-green-600 mb-2">
+          <div className="text-3xl font-bold text-ksg-goldDark mb-2">
             {stats.totalPlays.toLocaleString()}
           </div>
           <div className="text-gray-600 text-sm font-medium">Total Plays</div>
@@ -114,7 +114,7 @@ const StoryPulseDashboard = () => {
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-purple-600 mb-2">
+          <div className="text-3xl font-bold text-ksg-gold mb-2">
             {stats.totalShares.toLocaleString()}
           </div>
           <div className="text-gray-600 text-sm font-medium">Total Shares</div>
@@ -122,7 +122,7 @@ const StoryPulseDashboard = () => {
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-amber-600 mb-2">
+          <div className="text-3xl font-bold text-ksg-goldDark mb-2">
             {stats.activeUsers}
           </div>
           <div className="text-gray-600 text-sm font-medium">Active Users</div>
@@ -130,7 +130,7 @@ const StoryPulseDashboard = () => {
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-red-600 mb-2">
+          <div className="text-3xl font-bold text-ksg-gold mb-2">
             {stats.countiesCovered}/47
           </div>
           <div className="text-gray-600 text-sm font-medium">Counties</div>
@@ -150,10 +150,10 @@ const StoryPulseDashboard = () => {
                   <div className="text-sm text-gray-500">{county.plays.toLocaleString()} plays</div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="text-2xl font-bold text-blue-600">{county.stories}</div>
+                  <div className="text-2xl font-bold text-ksg-gold">{county.stories}</div>
                   <div className="w-20 bg-gray-200 rounded-full h-2">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full"
+                      className="bg-ksg-gold h-2 rounded-full"
                       style={{ width: `${(county.stories / 15) * 100}%` }}
                     ></div>
                   </div>
@@ -235,7 +235,7 @@ const StoryPulseDashboard = () => {
       </div>
 
       {/* Goal Progress */}
-      <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg text-white p-8">
+      <div className="bg-gradient-to-r from-ksg-gold to-ksg-goldDark rounded-lg text-white p-8">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold mb-2">Platform Goals Progress</h2>
           <p className="text-green-100">Tracking our journey to connect Kenya's knowledge network</p>

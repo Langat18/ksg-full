@@ -7,9 +7,9 @@ const LearningPathways = () => {
   const [selectedPathway, setSelectedPathway] = useState(null);
   
   // Styling constants
-  const cardStyle = 'bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 transition-all duration-300';
+  const cardStyle = 'bg-white border border-gray-200 rounded-lg shadow-sm hover:border-ksg-gold transition-all duration-300';
   const headingStyle = 'text-2xl font-bold text-gray-900 mb-4';
-  const buttonStyle = 'bg-gray-900 hover:bg-gray-800 text-white font-medium px-4 py-2 rounded transition-colors';
+  const buttonStyle = 'bg-ksg-gold hover:bg-ksg-goldDark text-white font-medium px-4 py-2 rounded transition-colors';
 
   const pathways = [
     {
@@ -39,7 +39,7 @@ const LearningPathways = () => {
       stories: 4,
       completed: user ? 0 : 0,
       category: "Environment & Climate",
-      color: "from-green-500 to-green-700",
+      color: "from-ksg-gold to-ksg-goldDark",
       steps: [
         { id: 1, title: "Understanding ASAL Challenges", type: "video", duration: "20 min", completed: false },
         { id: 2, title: "Water Innovation in Turkana", type: "audio", duration: "25 min", completed: false },
@@ -56,7 +56,7 @@ const LearningPathways = () => {
       stories: 6,
       completed: user ? 1 : 0,
       category: "Digital Innovation",
-      color: "from-purple-500 to-purple-700",
+      color: "from-ksg-gold to-ksg-goldDark",
       steps: [
         { id: 1, title: "Digital Kenya Strategy Overview", type: "document", duration: "15 min", completed: true },
         { id: 2, title: "E-Government in Nairobi", type: "video", duration: "18 min", completed: false },
@@ -93,10 +93,10 @@ const LearningPathways = () => {
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
-      case 'Beginner': return 'bg-green-100 text-green-800';
-      case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'Advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Beginner': return 'bg-ksg-gold/10 text-ksg-gold';
+      case 'Intermediate': return 'bg-ksg-gold/20 text-ksg-goldDark';
+      case 'Advanced': return 'bg-ksg-goldDark/20 text-ksg-goldDark';
+      default: return 'bg-ksg-gold/10 text-ksg-gold';
     }
   };
 

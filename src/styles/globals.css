@@ -5,9 +5,14 @@
 /* KSG Theme Colors */
 :root {
   --color-ksg-gold: #B5955B;
-  --color-ksg-red: #FF0000;
-  --color-ksg-green: #008000;
-  --color-ksg-black: #000000;
+  --color-ksg-gold-dark: #8C6A3C;
+  --color-white: #FFFFFF;
+  --color-black: rgb(28, 20, 0);
+  --color-transparent-white: rgba(255, 255, 255, 0.9);
+  --color-transparent-black: rgba(28, 20, 0, 0.4);
+  --color-hover-black: rgba(28, 20, 0, 0.6);
+  --color-hover-white: rgba(255, 255, 255, 0.1);
+  --color-hover-white-alpha: rgba(255, 255, 255, 0.8);
   --color-text: #1A1A1A;  /* Deep black for better readability */
 }
 
@@ -16,13 +21,11 @@ body {
   color: var(--color-text);
 }
 
-/* Utility Classes */
-.btn-primary {
-  background-color: var(--color-ksg-gold);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s;
+/* Custom Components */
+@layer components {
+  .btn-primary {
+    @apply bg-ksg-gold text-white px-4 py-2 rounded-lg transition-all duration-200;
+  }
 }
 
 .btn-primary:hover {

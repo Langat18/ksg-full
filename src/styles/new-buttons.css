@@ -1,0 +1,65 @@
+/* Base button styles using Tailwind's @layer and @apply */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-base {
+    @apply px-5 py-2 rounded-sm text-sm font-normal tracking-wider
+           transition-colors duration-200 cursor-pointer font-sans;
+  }
+
+  .btn-primary {
+    @apply btn-base bg-ksg-gold text-white border-none
+           hover:bg-ksg-goldDark;
+  }
+
+  .btn-secondary {
+    @apply btn-base bg-transparent text-ksg-gold 
+           border-2 border-ksg-gold
+           hover:bg-ksg-gold hover:text-white;
+  }
+
+  .dark-button {
+    @apply btn-base bg-ksg-dark text-white 
+           border-[1.5px] border-white/90
+           hover:bg-ksg-darkAlt;
+  }
+
+  .nav-link {
+    @apply py-1.5 px-3 text-sm font-normal tracking-wider 
+           transition-colors duration-200 no-underline font-sans 
+           text-white hover:text-white/80;
+  }
+
+  .nav-link.active {
+    @apply font-medium;
+  }
+
+  .link {
+    @apply text-ksg-gold no-underline transition-all duration-200
+           hover:text-ksg-goldDark hover:underline;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 border border-gray-200 rounded-md
+           transition-all duration-200
+           focus:outline-none focus:border-ksg-gold focus:ring-1 focus:ring-ksg-gold;
+  }
+
+  /* Button states */
+  .btn-primary:disabled,
+  .btn-secondary:disabled,
+  .dark-button:disabled {
+    @apply opacity-60 cursor-not-allowed;
+  }
+
+  /* Button sizes */
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+}
