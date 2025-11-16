@@ -40,7 +40,7 @@ const Search = () => {
         category: selectedCategory === 'All Categories' ? '' : selectedCategory,
         limit: 20 
       });
-      setResults(searchData.results ?? searchData);
+      setResults(searchData || []);
     } catch (error) {
       console.error('Search failed:', error);
       setResults([]);
@@ -79,10 +79,10 @@ const Search = () => {
             Discover Stories
           </h1>
           <div className="text-[#B5955B] text-xl font-semibold mb-4">
-            Explore Kenya's Knowledge Network
+            Explore Kenya&apos;s Knowledge Network
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Search through impactful stories from KSG's community across all 47 counties
+            Search through impactful stories from KSG&apos;s community across all 47 counties
           </p>
         </div>
 
@@ -90,11 +90,11 @@ const Search = () => {
         <div className="bg-white rounded-lg shadow-md p-6 mb-8 border-2 border-[#235D4C]/10 hover:border-[#235D4C]/20 transition-all duration-200">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Search Input - Fixed icon overlap */}
+              {/* Search Input */}
               <div className="lg:col-span-2">
                 <label className="form-ksg-label">Search Stories</label>
                 <div className="relative">
-                  <svg className="input-icon h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   <input 
@@ -112,7 +112,7 @@ const Search = () => {
                 <select
                   value={category}
                   onChange={(e) => handleCategorySelect(e.target.value)}
-                  className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%23235D4C%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22M6%208l4%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[length:1.5em_1.5em] bg-[right_0.5rem_center]"
+                  className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
                 >
                   {categories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
@@ -170,7 +170,7 @@ const Search = () => {
           <>
             {loading ? (
               <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-current mx-auto mb-4" style={{ borderColor: 'var(--ksg-primary)' }}></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#235D4C] mx-auto mb-4"></div>
                 <p className="text-gray-600">Searching stories...</p>
               </div>
             ) : (
@@ -230,7 +230,10 @@ const Search = () => {
                       >
                         Clear Search
                       </button>
-                      <Link to="/submit"                       className="px-6 py-3 bg-[#B5955B] text-white font-medium rounded-md hover:bg-[#B5955B]/90 focus:outline-none focus:ring-2 focus:ring-[#B5955B]/20 focus:ring-offset-2 transition-all duration-200 shadow-sm">
+                      <Link 
+                        to="/submit"
+                        className="px-6 py-3 bg-[#B5955B] text-white font-medium rounded-md hover:bg-[#B5955B]/90 focus:outline-none focus:ring-2 focus:ring-[#B5955B]/20 focus:ring-offset-2 transition-all duration-200 shadow-sm"
+                      >
                         Share Your Story
                       </Link>
                     </div>
@@ -249,7 +252,7 @@ const Search = () => {
             </svg>
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Start Your Discovery</h3>
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              Search transformational stories from across Kenya's 47 counties
+              Search transformational stories from across Kenya&apos;s 47 counties
             </p>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">

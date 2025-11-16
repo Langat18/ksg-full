@@ -34,7 +34,7 @@ api.interceptors.response.use(
   }
 );
 
-export const fetchStories = (params) => api.get('/stories', { params }).then((r) => r.data);
+export const fetchStories = (params) => api.get('/stories', { params }).then((r) => r.data.stories || []);
 export const fetchStory = (id) => api.get(`/stories/${id}`).then((r) => r.data);
 export const submitStory = (formData) => api.post('/stories', formData, { 
   headers: { 'Content-Type': 'multipart/form-data' } 

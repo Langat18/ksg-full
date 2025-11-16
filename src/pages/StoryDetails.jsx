@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchStory, fetchRelated } from '../services/api';
 
 const StoryDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [story, setStory] = useState(null);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!id) return;
@@ -14,15 +16,24 @@ const StoryDetails = () => {
     const loadStoryData = async () => {
       try {
         setLoading(true);
-        const [storyData, relatedData] = await Promise.all([
-          fetchStory(id),
-          fetchRelated(id)
-        ]);
+        setError(null);
         
+        // Fetch story details
+        const storyData = await fetchStory(id);
         setStory(storyData);
-        setRelated(relatedData);
+        
+        // Fetch related stories (optional, might fail if endpoint doesn't exist)
+        try {
+          const relatedData = await fetchRelated(id);
+          setRelated(relatedData || []);
+        } catch (relatedError) {
+          console.log('No related stories available');
+          setRelated([]);
+        }
+        
       } catch (error) {
         console.error('Failed to load story:', error);
+        setError(error.response?.data?.error || 'Failed to load story');
       } finally {
         setLoading(false);
       }
@@ -50,7 +61,7 @@ const StoryDetails = () => {
     );
   }
 
-  if (!story) {
+  if (error || !story) {
     return (
       <div className="section-ksg-padding">
         <div className="container-ksg-max">
@@ -59,7 +70,9 @@ const StoryDetails = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Story Not Found</h3>
-            <p className="text-gray-600 mb-6">The story you're looking for might have been moved or doesn't exist.</p>
+            <p className="text-gray-600 mb-6">
+              {error || "The story you're looking for might have been moved or doesn't exist."}
+            </p>
             <Link to="/search" className="btn-ksg-primary">
               Browse All Stories
             </Link>
@@ -69,7 +82,8 @@ const StoryDetails = () => {
     );
   }
 
-  const publishDate = new Date(story.published_at ?? story.created_at ?? Date.now());
+  const publishDate = new Date(story.published_at || story.created_at || Date.now());
+  const authorName = story.author?.full_name || story.author?.username || 'KSG Community';
 
   return (
     <div className="section-ksg-padding">
@@ -99,17 +113,17 @@ const StoryDetails = () => {
                 
                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
                   <div className="flex items-center space-x-2">
-                    <div className="h-8 w-8 hero-ksg-gradient rounded-full flex items-center justify-center">
-                      <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
+                    <div className="h-8 w-8 bg-gradient-to-br from-[#235D4C] to-[#B5955B] rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">
+                        {authorName.charAt(0).toUpperCase()}
+                      </span>
                     </div>
-                    <span className="font-medium">{story.author_name || 'KSG Community'}</span>
+                    <span className="font-medium">{authorName}</span>
                   </div>
                   
                   <div className="flex items-center space-x-2">
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a4 4 0 118 0v4m-4 7v5a7 7 0 01-7-7h1a6 6 0 006 6z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span>{publishDate.toLocaleDateString('en-US', { 
                       year: 'numeric', 
@@ -123,44 +137,70 @@ const StoryDetails = () => {
                       {story.category}
                     </span>
                   )}
+
+                  {story.county && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                      <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {story.county}
+                    </span>
+                  )}
                 </div>
 
-                <div className="flex items-center space-x-4">
-                  <button className="flex items-center space-x-2 text-blue-700 hover:text-blue-800 transition-colors">
+                {/* Engagement Stats */}
+                <div className="flex items-center space-x-6 text-sm text-gray-500">
+                  <div className="flex items-center space-x-1">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span>{story.views || 0} views</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    <span>{story.likes || 0} likes</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                     </svg>
-                    <span className="text-sm font-medium">Share Story</span>
-                  </button>
-                  
-                  <button className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                    </svg>
-                    <span className="text-sm font-medium">Save</span>
-                  </button>
+                    <span>{story.shares || 0} shares</span>
+                  </div>
                 </div>
               </div>
 
               {/* Media Content */}
               {story.media_url && (
                 <div className="mb-8">
-                  <div className="relative rounded-xl overflow-hidden shadow-lg">
-                    <video 
-                      controls 
-                      src={story.media_url} 
-                      className="media-ksg-video w-full"
-                      poster="/api/placeholder/800/450"
-                    >
-                      Your browser does not support the video tag.
-                    </video>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg bg-gray-100">
+                    {story.content_type === 'video' && (
+                      <video 
+                        controls 
+                        src={story.media_url} 
+                        className="w-full"
+                        poster={story.thumbnail_url}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    )}
+                    {story.content_type === 'audio' && (
+                      <div className="p-8">
+                        <audio controls className="w-full" src={story.media_url}>
+                          Your browser does not support the audio tag.
+                        </audio>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Story Description */}
               <div className="prose prose-lg max-w-none mb-8">
-                <div className="text-gray-700 leading-relaxed text-lg">
+                <div className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">
                   {story.description}
                 </div>
               </div>
@@ -183,15 +223,60 @@ const StoryDetails = () => {
               )}
 
               {/* Story Tags */}
-              {story.tags && (
+              {story.tags && story.tags.length > 0 && (
                 <div className="mt-8 pt-6 border-t border-gray-200">
                   <h3 className="text-sm font-semibold text-gray-900 mb-3">Related Topics</h3>
                   <div className="flex flex-wrap gap-2">
-                    {story.tags.split(',').map((tag, index) => (
+                    {(Array.isArray(story.tags) ? story.tags : story.tags.split(',')).map((tag, index) => (
                       <span key={index} className="tag-ksg">
-                        {tag.trim()}
+                        {typeof tag === 'string' ? tag.trim() : tag}
                       </span>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Entities (if available) */}
+              {story.entities && (story.entities.people?.length > 0 || story.entities.organizations?.length > 0 || story.entities.locations?.length > 0) && (
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Mentioned In Story</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    {story.entities.people?.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-gray-700 mb-2">People</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {story.entities.people.map((person, idx) => (
+                            <span key={idx} className="inline-block px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">
+                              {person}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {story.entities.organizations?.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-gray-700 mb-2">Organizations</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {story.entities.organizations.map((org, idx) => (
+                            <span key={idx} className="inline-block px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
+                              {org}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {story.entities.locations?.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-gray-700 mb-2">Locations</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {story.entities.locations.map((loc, idx) => (
+                            <span key={idx} className="inline-block px-2 py-1 bg-purple-50 text-purple-700 rounded text-xs">
+                              {loc}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -209,22 +294,22 @@ const StoryDetails = () => {
                 Story Contributor
               </h3>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="h-12 w-12 hero-ksg-gradient rounded-full flex items-center justify-center">
+                <div className="h-12 w-12 bg-gradient-to-br from-[#235D4C] to-[#B5955B] rounded-full flex items-center justify-center">
                   <span className="text-white font-semibold">
-                    {(story.author_name || 'KSG').charAt(0).toUpperCase()}
+                    {authorName.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">
-                    {story.author_name || 'KSG Community'}
+                    {authorName}
                   </div>
                   <div className="text-sm text-gray-500">
-                    Storyteller & Change Agent
+                    {story.author?.organization || 'KSG Community Member'}
                   </div>
                 </div>
               </div>
               <p className="text-sm text-gray-600">
-                Contributing to Kenya's transformation through shared experiences and insights.
+                {story.author?.bio || 'Contributing to Kenya\'s transformation through shared experiences and insights.'}
               </p>
             </div>
 
@@ -288,18 +373,18 @@ const StoryDetails = () => {
             </div>
 
             {/* Call to Action */}
-            <div className="card-ksg hero-ksg-gradient text-white">
+            <div className="card-ksg bg-gradient-to-br from-[#235D4C] to-[#1a4438] text-white">
               <div className="text-center">
-                <svg className="mx-auto h-12 w-12 text-yellow-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="mx-auto h-12 w-12 text-[#B5955B] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
                 <h3 className="font-semibold mb-2">Share Your Story</h3>
-                <p className="text-blue-100 text-sm mb-4">
+                <p className="text-white/90 text-sm mb-4">
                   Have an impact story to tell? Join our community of changemakers.
                 </p>
                 <Link
                   to="/submit"
-                  className="btn-ksg-secondary text-sm"
+                  className="inline-block px-4 py-2 bg-[#B5955B] hover:bg-[#B5955B]/90 text-white rounded-md font-medium transition-colors text-sm"
                 >
                   Submit Your Story
                 </Link>

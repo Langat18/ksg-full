@@ -5,15 +5,18 @@ import { Navigate } from 'react-router-dom';
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
+    password: '',
     name: '',
     role: ''
   });
+  const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login, isAuthenticated } = useAuth();
+  const [error, setError] = useState('');
+  const { login, register, isAuthenticated } = useAuth();
 
   // Redirect if already authenticated
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const roles = [
@@ -30,25 +33,42 @@ const Login = () => {
       ...prev,
       [name]: value
     }));
+    // Clear error when user types
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In production, this would call an actual authentication API
-      login({
-        name: formData.name,
-        email: formData.email,
-        role: formData.role,
-        isAdmin: formData.email.endsWith('@ksg.ac.ke')
-      });
+      if (isRegistering) {
+        // Register new user
+        const result = await register({
+          email: formData.email,
+          username: formData.email.split('@')[0], // Generate username from email
+          password: formData.password,
+          full_name: formData.name,
+          role: 'user',
+          organization: 'Kenya School of Government',
+          county: 'Nairobi' // Default, can be updated in profile
+        });
+
+        if (!result.success) {
+          setError(result.error);
+        }
+      } else {
+        // Login existing user
+        const result = await login(formData.email, formData.password);
+        
+        if (!result.success) {
+          setError(result.error);
+        }
+      }
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Authentication failed:', error);
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -65,35 +85,49 @@ const Login = () => {
             </svg>
           </div>
           <h2 className="text-4xl font-bold text-gray-900 mb-3">
-            Welcome to KSG
+            {isRegistering ? 'Join KSG Platform' : 'Welcome to KSG'}
           </h2>
           <div className="text-[#B5955B] text-xl font-semibold mb-2">
             Digital Storytelling Platform
           </div>
           <p className="text-gray-600 leading-relaxed">
-            Join Kenya's premier knowledge network and share your transformational stories
+            {isRegistering 
+              ? 'Create an account to share your transformational stories'
+              : 'Join Kenya\'s premier knowledge network'}
           </p>
         </div>
 
-        {/* KSG-Inspired Login Form */}
+        {/* KSG-Inspired Login/Register Form */}
         <div className="bg-white rounded-lg shadow-md p-8 border-2 border-[#235D4C]/10 hover:border-[#235D4C]/20 transition-all duration-200">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name Field */}
-            <div className="form-ksg-group">
-              <label htmlFor="name" className="form-ksg-label">
-                Full Name *
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 placeholder-gray-400 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
-                placeholder="Enter your full name"
-              />
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border-2 border-red-400 text-red-700 px-4 py-3 rounded-lg flex items-start">
+              <svg className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{error}</span>
             </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Name Field - Only for registration */}
+            {isRegistering && (
+              <div className="form-ksg-group">
+                <label htmlFor="name" className="form-ksg-label">
+                  Full Name *
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 placeholder-gray-400 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
+                  placeholder="Enter your full name"
+                />
+              </div>
+            )}
 
             {/* Email Field */}
             <div className="form-ksg-group">
@@ -111,34 +145,58 @@ const Login = () => {
                 placeholder="name@organization.go.ke"
               />
               <div className="mt-2 text-sm text-[#235D4C]/70 flex items-center">
-                <svg className="h-4 w-4 text-blue-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-blue-500 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 KSG staff emails (@ksg.ac.ke) receive administrative privileges
               </div>
             </div>
 
-            {/* Role Field */}
+            {/* Password Field */}
             <div className="form-ksg-group">
-              <label htmlFor="role" className="form-ksg-label">
-                Your Role at KSG
+              <label htmlFor="password" className="form-ksg-label">
+                Password *
               </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={formData.password}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%23235D4C%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22M6%208l4%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[length:1.5em_1.5em] bg-[right_0.5rem_center]"
-              >
-                <option value="">Select your role (optional)</option>
-                {roles.map(role => (
-                  <option key={role} value={role}>{role}</option>
-                ))}
-              </select>
-              <div className="mt-2 text-sm text-[#235D4C]/70">
-                This helps us customize your platform experience
-              </div>
+                className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 placeholder-gray-400 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
+                placeholder={isRegistering ? "Create a strong password" : "Enter your password"}
+              />
+              {isRegistering && (
+                <div className="mt-2 text-sm text-[#235D4C]/70">
+                  Password must be at least 8 characters
+                </div>
+              )}
             </div>
+
+            {/* Role Field - Only for registration */}
+            {isRegistering && (
+              <div className="form-ksg-group">
+                <label htmlFor="role" className="form-ksg-label">
+                  Your Role at KSG
+                </label>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
+                >
+                  <option value="">Select your role (optional)</option>
+                  {roles.map(role => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
+                </select>
+                <div className="mt-2 text-sm text-[#235D4C]/70">
+                  This helps us customize your platform experience
+                </div>
+              </div>
+            )}
 
             {/* Submit Button */}
             <button
@@ -153,18 +211,55 @@ const Login = () => {
               {loading ? (
                 <div className="flex items-center space-x-3">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Authenticating...</span>
+                  <span>{isRegistering ? 'Creating Account...' : 'Signing In...'}</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                   </svg>
-                  <span>Access Platform</span>
+                  <span>{isRegistering ? 'Create Account' : 'Access Platform'}</span>
                 </div>
               )}
             </button>
+
+            {/* Toggle between Login/Register */}
+            <div className="text-center pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegistering(!isRegistering);
+                  setError('');
+                }}
+                className="text-[#235D4C] hover:text-[#B5955B] font-medium transition-colors"
+              >
+                {isRegistering 
+                  ? 'Already have an account? Sign in' 
+                  : "Don't have an account? Register"}
+              </button>
+            </div>
           </form>
+
+          {/* Test Credentials - Only show in login mode */}
+          {!isRegistering && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start">
+                  <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-900 mb-2">Test Credentials</p>
+                    <div className="text-xs text-blue-800 space-y-1">
+                      <p><strong>Email:</strong> test@ksg.ac.ke</p>
+                      <p><strong>Password:</strong> password123</p>
+                      <p className="mt-2 text-blue-600">This account has admin privileges</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* KSG Platform Information */}
@@ -209,7 +304,7 @@ const Login = () => {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600 mb-4">
             By accessing this platform, you agree to contribute meaningful stories that showcase 
-            KSG's impact on Kenya's development and governance transformation.
+            KSG&apos;s impact on Kenya&apos;s development and governance transformation.
           </p>
           <div className="flex items-center justify-center space-x-6">
             <div className="flex items-center space-x-2">

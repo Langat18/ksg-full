@@ -1,26 +1,49 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import StoryForm from '../widgets/StoryForm';
 import { submitStory } from '../services/api';
 
 const SubmitStory = () => {
   const [status, setStatus] = useState(null);
   const [submittedStory, setSubmittedStory] = useState(null);
+  const { isAuthenticated, token } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect to login if not authenticated
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (formData) => {
     try {
       setStatus({ type: 'pending' });
       
+      // Create FormData for file upload
       const payload = new FormData();
       payload.append('title', formData.title);
       payload.append('description', formData.description);
+      payload.append('content_type', formData.contentType || 'video'); // Map to backend field
       payload.append('category', formData.category);
-      payload.append('authorName', formData.authorName);
-      payload.append('authorEmail', formData.authorEmail);
+      payload.append('county', formData.county || 'Nairobi');
       payload.append('transcript', formData.transcript || '');
+      payload.append('duration', formData.duration || 0);
       
+      // Add tags if present
+      if (formData.tags) {
+        payload.append('tags', formData.tags);
+      }
+      
+      // Add media file if present
       if (formData.file) {
-        payload.append('file', formData.file);
+        payload.append('media_file', formData.file);
+      }
+      
+      // Add thumbnail if present
+      if (formData.thumbnail) {
+        payload.append('thumbnail', formData.thumbnail);
       }
       
       const result = await submitStory(payload);
@@ -28,7 +51,10 @@ const SubmitStory = () => {
       setStatus({ type: 'success', data: result });
     } catch (error) {
       console.error('Submission error:', error);
-      setStatus({ type: 'error', message: error.message || 'Submission failed' });
+      setStatus({ 
+        type: 'error', 
+        message: error.response?.data?.error || error.message || 'Submission failed. Please try again.' 
+      });
     }
   };
 
@@ -36,6 +62,10 @@ const SubmitStory = () => {
     setStatus(null);
     setSubmittedStory(null);
   };
+
+  if (!isAuthenticated) {
+    return null; // Will redirect via useEffect
+  }
 
   return (
     <div className="section-ksg-padding" style={{ backgroundColor: 'var(--ksg-light-gray)' }}>
@@ -80,14 +110,20 @@ const SubmitStory = () => {
                 <div>
                   <h3 className="font-semibold">Story Submitted Successfully!</h3>
                   <p className="mt-1">
-                    Your story "{submittedStory?.title || formData?.title || 'Untitled'}" has been submitted for review.
+                    Your story &quot;{submittedStory?.title || 'Untitled'}&quot; has been published and is now live!
+                  </p>
+                  <p className="mt-2 text-sm">
+                    You earned <span className="font-bold text-green-600">+50 points</span> for this contribution.
                   </p>
                   <div className="mt-4 flex space-x-3">
                     <button onClick={resetForm} className="btn-ksg-outline">
                       Submit Another Story
                     </button>
-                    <Link to="/search" className="btn-ksg-primary">
-                      Browse Stories
+                    <Link to={`/story/${submittedStory?.id}`} className="btn-ksg-primary">
+                      View Your Story
+                    </Link>
+                    <Link to="/dashboard" className="btn-ksg-secondary">
+                      Go to Dashboard
                     </Link>
                   </div>
                 </div>
@@ -109,7 +145,7 @@ const SubmitStory = () => {
                 </svg>
                 <div>
                   <h3 className="font-semibold">Submission Failed</h3>
-                  <p className="mt-1">{status.message || 'Please try again or contact support.'}</p>
+                  <p className="mt-1">{status.message}</p>
                   <button 
                     onClick={() => setStatus(null)} 
                     className="mt-3 text-sm font-medium" 
@@ -173,19 +209,19 @@ const SubmitStory = () => {
                         <svg className="h-4 w-4 mt-1 flex-shrink-0" style={{ color: 'var(--ksg-info)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>Video files: MP4, max 100MB</span>
+                        <span>Video files: MP4, max 500MB</span>
                       </li>
                       <li className="flex items-start space-x-2">
                         <svg className="h-4 w-4 mt-1 flex-shrink-0" style={{ color: 'var(--ksg-info)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>Audio files: MP3, WAV, max 50MB</span>
+                        <span>Audio files: MP3, WAV, M4A, max 50MB</span>
                       </li>
                       <li className="flex items-start space-x-2">
                         <svg className="h-4 w-4 mt-1 flex-shrink-0" style={{ color: 'var(--ksg-info)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>Review within 48 hours</span>
+                        <span>Published immediately upon submission</span>
                       </li>
                     </ul>
                   </div>
