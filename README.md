@@ -6,11 +6,11 @@ Quick start:
    npm install
 
 2. Start mock API server:
-   npm run mock:server
-   (serves at http://localhost:8000/api/...)
+   start server: python.run
+  CORS_ORIGINS=http://localhost:5173,http://localhost:5174
 
 3. In new terminal run frontend:
    npm run dev
    Open http://localhost:5173
 
-4. 
+4. Both frontend and backend are running from the same port.
