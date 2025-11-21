@@ -92,28 +92,3 @@ class PathwayProgress(db.Model):
             'completed_at': self.completed_at.isoformat() if self.completed_at else None,
             'started_at': self.started_at.isoformat() if self.started_at else None
         }
-
-class Bookmark(db.Model):
-    __tablename__ = 'bookmarks'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    story_id = db.Column(db.Integer, db.ForeignKey('stories.id'), nullable=False)
-    timestamp = db.Column(db.Integer)  # Timestamp in seconds where user bookmarked
-    note = db.Column(db.Text)
-    
-    # Timestamps
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Relationships
-    story = db.relationship('Story', back_populates='bookmarks')
-    
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'story_id': self.story_id,
-            'timestamp': self.timestamp,
-            'note': self.note,
-            'created_at': self.created_at.isoformat() if self.created_at else None
-        }

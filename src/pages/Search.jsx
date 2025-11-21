@@ -35,11 +35,16 @@ const Search = () => {
     setHasSearched(true);
     
     try {
-      const searchData = await fetchStories({ 
-        q: searchQuery, 
-        category: selectedCategory === 'All Categories' ? '' : selectedCategory,
-        limit: 20 
-      });
+      const params = {
+        limit: 20
+      };
+      
+      if (searchQuery) params.q = searchQuery;
+      if (selectedCategory && selectedCategory !== 'All Categories') {
+        params.category = selectedCategory;
+      }
+      
+      const searchData = await fetchStories(params);
       setResults(searchData || []);
     } catch (error) {
       console.error('Search failed:', error);

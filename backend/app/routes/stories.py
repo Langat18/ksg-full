@@ -22,10 +22,12 @@ def get_stories():
     """Get all stories with filtering and pagination"""
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
+    limit = request.args.get('limit', per_page, type=int)
     county = request.args.get('county')
     category = request.args.get('category')
     status = request.args.get('status', 'published')
     search = request.args.get('search')
+    q = request.args.get('q')  # Alternative search parameter
     
     query = Story.query.filter_by(status=status)
     
@@ -35,6 +37,23 @@ def get_stories():
         query = query.filter_by(category=category)
     if search:
         query = query.filter(Story.title.ilike(f'%{search}%'))
+    if q:
+        query = query.filter(
+            db.or_(
+                Story.title.ilike(f'%{q}%'),
+                Story.description.ilike(f'%{q}%')
+            )
+        )
+    
+    # If limit is specified, use it instead of pagination
+    if limit and limit != per_page:
+        stories = query.order_by(Story.created_at.desc()).limit(limit).all()
+        return jsonify({
+            'stories': [story.to_dict() for story in stories],
+            'total': query.count(),
+            'pages': 1,
+            'current_page': 1
+        })
     
     pagination = query.order_by(Story.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
@@ -57,6 +76,39 @@ def get_story(story_id):
     db.session.commit()
     
     return jsonify(story.to_dict())
+
+@bp.route('/<int:story_id>/related', methods=['GET'])
+def get_related_stories(story_id):
+    """Get related stories based on category, county, and tags"""
+    story = Story.query.get_or_404(story_id)
+    
+    # Find stories with same category or county, excluding the current story
+    related_query = Story.query.filter(
+        Story.id != story_id,
+        Story.status == 'published'
+    )
+    
+    # Prioritize stories with same category or county
+    if story.category or story.county:
+        related_query = related_query.filter(
+            db.or_(
+                Story.category == story.category if story.category else False,
+                Story.county == story.county if story.county else False
+            )
+        )
+    
+    # Get up to 5 related stories, ordered by views
+    related = related_query.order_by(Story.views.desc()).limit(5).all()
+    
+    # If we don't have enough related stories, get some random recent ones
+    if len(related) < 3:
+        additional = Story.query.filter(
+            Story.id != story_id,
+            Story.status == 'published'
+        ).order_by(Story.created_at.desc()).limit(5 - len(related)).all()
+        related.extend(additional)
+    
+    return jsonify([s.to_dict() for s in related])
 
 @bp.route('/', methods=['POST'])
 @jwt_required()
@@ -117,7 +169,10 @@ def create_story():
     db.session.commit()
     
     # Add to graph database
-    graph_service.add_story_node(story)
+    try:
+        graph_service.add_story_node(story)
+    except Exception as e:
+        print(f"Warning: Could not add to graph database: {e}")
     
     # Award points for contribution
     contribution = Contribution(
@@ -217,13 +272,16 @@ def like_story(story_id):
 @bp.route('/featured', methods=['GET'])
 def get_featured_stories():
     """Get featured stories"""
-    stories = Story.query.filter_by(status='published', featured=True).order_by(Story.created_at.desc()).limit(10).all()
+    stories = Story.query.filter_by(
+        status='published', 
+        featured=True
+    ).order_by(Story.created_at.desc()).limit(10).all()
+    
     return jsonify([story.to_dict() for story in stories])
 
 @bp.route('/trending', methods=['GET'])
 def get_trending_stories():
     """Get trending stories based on recent engagement"""
-    # Simple trending algorithm: stories with most views in last 7 days
     from datetime import datetime, timedelta
     week_ago = datetime.utcnow() - timedelta(days=7)
     
@@ -233,3 +291,72 @@ def get_trending_stories():
     ).order_by(Story.views.desc()).limit(10).all()
     
     return jsonify([story.to_dict() for story in stories])
+
+@bp.route('/by-category/<category>', methods=['GET'])
+def get_stories_by_category(category):
+    """Get stories by specific category"""
+    limit = request.args.get('limit', 20, type=int)
+    
+    stories = Story.query.filter_by(
+        status='published',
+        category=category
+    ).order_by(Story.created_at.desc()).limit(limit).all()
+    
+    return jsonify({
+        'category': category,
+        'stories': [story.to_dict() for story in stories],
+        'total': Story.query.filter_by(status='published', category=category).count()
+    })
+
+@bp.route('/by-county/<county>', methods=['GET'])
+def get_stories_by_county(county):
+    """Get stories by specific county"""
+    limit = request.args.get('limit', 20, type=int)
+    
+    stories = Story.query.filter_by(
+        status='published',
+        county=county
+    ).order_by(Story.created_at.desc()).limit(limit).all()
+    
+    return jsonify({
+        'county': county,
+        'stories': [story.to_dict() for story in stories],
+        'total': Story.query.filter_by(status='published', county=county).count()
+    })
+
+@bp.route('/search', methods=['GET'])
+def search_stories():
+    """Advanced search endpoint"""
+    query_text = request.args.get('q', '')
+    category = request.args.get('category')
+    county = request.args.get('county')
+    limit = request.args.get('limit', 20, type=int)
+    
+    query = Story.query.filter_by(status='published')
+    
+    if query_text:
+        query = query.filter(
+            db.or_(
+                Story.title.ilike(f'%{query_text}%'),
+                Story.description.ilike(f'%{query_text}%'),
+                Story.transcript.ilike(f'%{query_text}%')
+            )
+        )
+    
+    if category:
+        query = query.filter_by(category=category)
+    
+    if county:
+        query = query.filter_by(county=county)
+    
+    stories = query.order_by(Story.created_at.desc()).limit(limit).all()
+    
+    return jsonify({
+        'query': query_text,
+        'filters': {
+            'category': category,
+            'county': county
+        },
+        'stories': [story.to_dict() for story in stories],
+        'total': query.count()
+    })

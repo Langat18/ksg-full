@@ -4,44 +4,23 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [activeChapter, setActiveChapter] = useState(0);
   const [showTranscript, setShowTranscript] = useState(true);
   const [bookmarks, setBookmarks] = useState([]);
   const mediaRef = useRef(null);
 
-  // Mock chapters data - in real app, this would come from the story object
-  const chapters = [
-    { title: "The Challenge", startTime: 0, endTime: 120 },
-    { title: "Finding Solutions", startTime: 120, endTime: 240 },
-    { title: "Implementation", startTime: 240, endTime: 360 },
-    { title: "Impact & Results", startTime: 360, endTime: 480 }
-  ];
-
-  // Mock transcript data with timestamps
-  const transcriptSegments = [
-    { startTime: 0, endTime: 15, text: "Welcome to this story about innovation in county governance." },
-    { startTime: 15, endTime: 35, text: "When I first arrived in Machakos County, the challenges seemed overwhelming." },
-    { startTime: 35, endTime: 55, text: "Citizens were frustrated with service delivery, and transparency was limited." },
-    { startTime: 55, endTime: 80, text: "We knew we had to implement digital solutions, but where to start?" },
-    { startTime: 120, endTime: 145, text: "The breakthrough came when we partnered with local tech innovators." },
-    { startTime: 145, endTime: 170, text: "Together, we developed a citizen engagement platform that changed everything." },
-    { startTime: 240, endTime: 270, text: "Implementation wasn't smooth sailing, but the community support was incredible." },
-    { startTime: 360, endTime: 390, text: "Today, citizen satisfaction has improved by 75%, and transparency is the norm." }
-  ];
+  // Parse transcript into segments (if available)
+  const transcriptSegments = story.transcript ? 
+    story.transcript.split('\n').filter(line => line.trim()).map((line, index) => ({
+      startTime: index * 30, // Rough estimate: 30 seconds per segment
+      endTime: (index + 1) * 30,
+      text: line.trim()
+    })) : [];
 
   useEffect(() => {
     const media = mediaRef.current;
     if (!media) return;
 
-    const updateTime = () => {
-      setCurrentTime(media.currentTime);
-      // Update active chapter
-      const current = chapters.findIndex(
-        chapter => media.currentTime >= chapter.startTime && media.currentTime < chapter.endTime
-      );
-      if (current !== -1) setActiveChapter(current);
-    };
-
+    const updateTime = () => setCurrentTime(media.currentTime);
     const updateDuration = () => setDuration(media.duration);
     const updatePlayState = () => setIsPlaying(!media.paused);
 
@@ -110,13 +89,13 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
     if (onShare) onShare(shareData);
   };
 
-  const isMediaVideo = story.media_url && story.media_url.includes('video');
+  const isMediaVideo = story.content_type === 'video';
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Media Player */}
       <div className="relative bg-black">
-        {isMediaVideo ? (
+        {isMediaVideo && story.media_url ? (
           <video
             ref={mediaRef}
             className="w-full h-64 md:h-96"
@@ -129,10 +108,10 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
           <div className="w-full h-64 md:h-96 bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center">
             <audio
               ref={mediaRef}
-              src={story.media_url || '/sample-audio.mp3'}
+              src={story.media_url}
               className="hidden"
             />
-            <div className="text-center text-white">
+            <div className="text-center text-white px-4">
               <div className="h-20 w-20 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center">
                 <svg className="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
@@ -147,7 +126,13 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
         {/* Player Controls Overlay */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
           {/* Progress Bar */}
-          <div className="w-full bg-white/30 rounded-full h-2 mb-4">
+          <div className="w-full bg-white/30 rounded-full h-2 mb-4 cursor-pointer"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const percent = (e.clientX - rect.left) / rect.width;
+              seekTo(percent * duration);
+            }}
+          >
             <div
               className="bg-white rounded-full h-2 transition-all duration-300"
               style={{ width: `${(currentTime / duration) * 100}%` }}
@@ -200,63 +185,52 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
         </div>
       </div>
 
-      {/* Chapter Navigation */}
-      <div className="border-b bg-gray-50 px-6 py-3">
-        <div className="flex space-x-4 overflow-x-auto">
-          {chapters.map((chapter, index) => (
-            <button
-              key={index}
-              onClick={() => seekTo(chapter.startTime)}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeChapter === index
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              {chapter.title}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Interactive Transcript */}
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Interactive Transcript</h3>
-          <button
-            onClick={() => setShowTranscript(!showTranscript)}
-            className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-          >
-            {showTranscript ? 'Hide' : 'Show'} Transcript
-          </button>
-        </div>
-
-        {showTranscript && (
-          <div className="space-y-3 max-h-64 overflow-y-auto">
-            {transcriptSegments.map((segment, index) => {
-              const isActive = currentTime >= segment.startTime && currentTime < segment.endTime;
-              return (
-                <div
-                  key={index}
-                  onClick={() => handleTranscriptClick(segment)}
-                  className={`p-3 rounded-lg cursor-pointer transition-all ${
-                    isActive
-                      ? 'bg-blue-100 border-l-4 border-blue-600 text-blue-900'
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <p className="text-sm leading-relaxed flex-1">{segment.text}</p>
-                    <span className="text-xs text-gray-500 ml-3 flex-shrink-0">
-                      {formatTime(segment.startTime)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+      {story.transcript && (
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Interactive Transcript</h3>
+            <button
+              onClick={() => setShowTranscript(!showTranscript)}
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+            >
+              {showTranscript ? 'Hide' : 'Show'} Transcript
+            </button>
           </div>
-        )}
-      </div>
+
+          {showTranscript && (
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {transcriptSegments.length > 0 ? (
+                transcriptSegments.map((segment, index) => {
+                  const isActive = currentTime >= segment.startTime && currentTime < segment.endTime;
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => handleTranscriptClick(segment)}
+                      className={`p-3 rounded-lg cursor-pointer transition-all ${
+                        isActive
+                          ? 'bg-blue-100 border-l-4 border-blue-600 text-blue-900'
+                          : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <p className="text-sm leading-relaxed flex-1">{segment.text}</p>
+                        <span className="text-xs text-gray-500 ml-3 flex-shrink-0">
+                          {formatTime(segment.startTime)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p className="whitespace-pre-wrap">{story.transcript}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Bookmarks */}
       {bookmarks.length > 0 && (
@@ -269,11 +243,11 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
                 onClick={() => seekTo(bookmark.time)}
                 className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
               >
-                <div>
+                <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm text-gray-900">{bookmark.title}</div>
                   <div className="text-xs text-gray-600 truncate">{bookmark.description}</div>
                 </div>
-                <div className="text-xs text-gray-500">{formatTime(bookmark.time)}</div>
+                <div className="text-xs text-gray-500 ml-3">{formatTime(bookmark.time)}</div>
               </div>
             ))}
           </div>
