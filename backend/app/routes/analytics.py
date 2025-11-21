@@ -1,142 +1,197 @@
 from flask import Blueprint, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.story import Story
 from app.models.user import User
-from sqlalchemy import func
+from app.models.contribution import Contribution
 from datetime import datetime, timedelta
+from sqlalchemy import func, desc
 
 bp = Blueprint('analytics', __name__)
 
-@bp.route('/dashboard', methods=['GET'])
-def get_public_dashboard():
-    """
-    Get public analytics dashboard data (Story Pulse)
-    """
-    # Total counts
+@bp.route('/summary', methods=['GET'])
+def get_analytics_summary():
+    """Get overall platform analytics"""
+    
+    # Total stories
     total_stories = Story.query.filter_by(status='published').count()
-    total_users = User.query.count()
-    total_views = db.session.query(func.sum(Story.views)).scalar() or 0
-    total_shares = db.session.query(func.sum(Story.shares)).scalar() or 0
     
-    # Stories by county
-    stories_by_county = db.session.query(
-        Story.county,
+    # Total engagement metrics
+    stories = Story.query.filter_by(status='published').all()
+    total_views = sum(story.views for story in stories)
+    total_shares = sum(story.shares for story in stories)
+    total_likes = sum(story.likes for story in stories)
+    
+    # Active users (users who logged in last 30 days)
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    active_users = User.query.filter(User.last_login >= thirty_days_ago).count()
+    
+    # Counties covered
+    counties_covered = db.session.query(func.count(func.distinct(Story.county))).filter(
+        Story.status == 'published',
+        Story.county.isnot(None)
+    ).scalar()
+    
+    # Top category
+    top_category = db.session.query(
+        Story.category,
         func.count(Story.id).label('count')
     ).filter(
         Story.status == 'published',
-        Story.county.isnot(None)
-    ).group_by(Story.county).all()
+        Story.category.isnot(None)
+    ).group_by(Story.category).order_by(desc('count')).first()
     
-    # Hot topics (from tags)
+    # Stories by county (top 10)
+    counties_data = db.session.query(
+        Story.county,
+        func.count(Story.id).label('stories'),
+        func.sum(Story.views).label('plays')
+    ).filter(
+        Story.status == 'published',
+        Story.county.isnot(None)
+    ).group_by(Story.county).order_by(desc('stories')).limit(10).all()
+    
+    # Hot topics (top categories)
     hot_topics = db.session.query(
-        func.unnest(Story.tags).label('tag'),
-        func.count().label('count')
-    ).filter(
-        Story.status == 'published',
-        Story.tags.isnot(None)
-    ).group_by('tag').order_by(func.count().desc()).limit(20).all()
-    
-    # Most viewed stories (this month)
-    month_ago = datetime.utcnow() - timedelta(days=30)
-    most_viewed = Story.query.filter(
-        Story.status == 'published',
-        Story.created_at >= month_ago
-    ).order_by(Story.views.desc()).limit(10).all()
-    
-    # Content type distribution
-    content_types = db.session.query(
-        Story.content_type,
+        Story.category,
         func.count(Story.id).label('count')
     ).filter(
+        Story.status == 'published',
+        Story.category.isnot(None)
+    ).group_by(Story.category).order_by(desc('count')).limit(6).all()
+    
+    # Top contributors
+    top_contributors = db.session.query(
+        User.id,
+        User.full_name,
+        User.username,
+        func.count(Story.id).label('story_count')
+    ).join(Story, User.id == Story.author_id).filter(
         Story.status == 'published'
-    ).group_by(Story.content_type).all()
+    ).group_by(User.id).order_by(desc('story_count')).limit(5).all()
     
-    # Growth over time (last 6 months)
-    six_months_ago = datetime.utcnow() - timedelta(days=180)
-    monthly_growth = db.session.query(
-        func.date_trunc('month', Story.created_at).label('month'),
-        func.count(Story.id).label('count')
-    ).filter(
-        Story.status == 'published',
-        Story.created_at >= six_months_ago
-    ).group_by('month').order_by('month').all()
+    # Recent activity (last 10 stories)
+    recent_stories = Story.query.filter_by(status='published').order_by(
+        Story.created_at.desc()
+    ).limit(10).all()
     
     return jsonify({
-        'overview': {
-            'total_stories': total_stories,
-            'total_users': total_users,
-            'total_views': total_views,
-            'total_shares': total_shares
-        },
-        'stories_by_county': [
-            {'county': county, 'count': count} 
-            for county, count in stories_by_county
-        ],
-        'hot_topics': [
-            {'topic': tag, 'count': count} 
-            for tag, count in hot_topics if tag
-        ],
-        'most_viewed': [story.to_dict() for story in most_viewed],
-        'content_types': [
-            {'type': content_type, 'count': count} 
-            for content_type, count in content_types
-        ],
-        'monthly_growth': [
-            {'month': month.isoformat() if month else None, 'count': count} 
-            for month, count in monthly_growth
-        ]
-    })
-
-@bp.route('/stories/<int:story_id>/analytics', methods=['GET'])
-def get_story_analytics(story_id):
-    """Get analytics for a specific story"""
-    story = Story.query.get_or_404(story_id)
-    
-    # Get engagement over time (simplified)
-    # In production, you'd track this in a separate table
-    
-    return jsonify({
-        'story_id': story_id,
-        'title': story.title,
-        'views': story.views,
-        'shares': story.shares,
-        'likes': story.likes,
-        'comments_count': story.comments_count,
-        'created_at': story.created_at.isoformat() if story.created_at else None
-    })
-
-@bp.route('/trends', methods=['GET'])
-def get_trends():
-    """Get trending topics and stories"""
-    days = request.args.get('days', 7, type=int)
-    start_date = datetime.utcnow() - timedelta(days=days)
-    
-    # Trending stories
-    trending_stories = Story.query.filter(
-        Story.status == 'published',
-        Story.created_at >= start_date
-    ).order_by(Story.views.desc()).limit(20).all()
-    
-    # Trending counties
-    trending_counties = db.session.query(
-        Story.county,
-        func.count(Story.id).label('story_count'),
-        func.sum(Story.views).label('total_views')
-    ).filter(
-        Story.status == 'published',
-        Story.created_at >= start_date,
-        Story.county.isnot(None)
-    ).group_by(Story.county).order_by(func.sum(Story.views).desc()).limit(10).all()
-    
-    return jsonify({
-        'period_days': days,
-        'trending_stories': [story.to_dict() for story in trending_stories],
-        'trending_counties': [
+        'total_stories': total_stories,
+        'total_views': total_views,
+        'total_plays': total_views,  # Same as views
+        'total_shares': total_shares,
+        'total_likes': total_likes,
+        'active_users': active_users if active_users else 0,
+        'counties_covered': counties_covered if counties_covered else 0,
+        'top_category': top_category[0] if top_category else 'N/A',
+        'counties_data': [
             {
                 'county': county,
-                'story_count': story_count,
-                'total_views': total_views
+                'stories': stories,
+                'plays': plays if plays else 0
             }
-            for county, story_count, total_views in trending_counties
+            for county, stories, plays in counties_data
+        ],
+        'hot_topics': [
+            {
+                'topic': category,
+                'count': count,
+                'trend': 'up'  # You can enhance this with time-based analysis
+            }
+            for category, count in hot_topics
+        ],
+        'top_contributors': [
+            {
+                'id': user_id,
+                'name': full_name or username,
+                'stories': story_count,
+                'impact': 'High' if story_count >= 3 else 'Medium',
+                'category': 'Contributor'
+            }
+            for user_id, full_name, username, story_count in top_contributors
+        ],
+        'recent_activity': [
+            {
+                'action': 'New story published',
+                'title': story.title,
+                'time': format_time_ago(story.created_at),
+                'author': story.author.full_name or story.author.username
+            }
+            for story in recent_stories
         ]
     })
+
+@bp.route('/user/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_user_analytics(user_id):
+    """Get analytics for a specific user"""
+    current_user_id = get_jwt_identity()
+    
+    # Only allow users to see their own analytics or admins
+    user = User.query.get_or_404(user_id)
+    current_user = User.query.get(current_user_id)
+    
+    if current_user_id != user_id and current_user.role != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    # User's stories
+    user_stories = Story.query.filter_by(author_id=user_id, status='published').all()
+    
+    # Calculate engagement
+    total_views = sum(story.views for story in user_stories)
+    total_shares = sum(story.shares for story in user_stories)
+    total_likes = sum(story.likes for story in user_stories)
+    
+    # Most popular story
+    most_popular = max(user_stories, key=lambda s: s.views) if user_stories else None
+    
+    return jsonify({
+        'user_id': user_id,
+        'stories_count': len(user_stories),
+        'total_views': total_views,
+        'total_shares': total_shares,
+        'total_likes': total_likes,
+        'points': user.points,
+        'level': user.level,
+        'most_popular_story': most_popular.to_dict() if most_popular else None
+    })
+
+@bp.route('/trending', methods=['GET'])
+def get_trending_analytics():
+    """Get trending stories and topics"""
+    # Stories trending this week
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    
+    trending_stories = Story.query.filter(
+        Story.status == 'published',
+        Story.created_at >= week_ago
+    ).order_by(Story.views.desc()).limit(10).all()
+    
+    return jsonify({
+        'trending_stories': [story.to_dict() for story in trending_stories]
+    })
+
+def format_time_ago(dt):
+    """Format datetime as time ago string"""
+    if not dt:
+        return 'recently'
+    
+    now = datetime.utcnow()
+    diff = now - dt
+    
+    seconds = diff.total_seconds()
+    
+    if seconds < 60:
+        return 'just now'
+    elif seconds < 3600:
+        minutes = int(seconds / 60)
+        return f'{minutes} minute{"s" if minutes != 1 else ""} ago'
+    elif seconds < 86400:
+        hours = int(seconds / 3600)
+        return f'{hours} hour{"s" if hours != 1 else ""} ago'
+    elif seconds < 604800:
+        days = int(seconds / 86400)
+        return f'{days} day{"s" if days != 1 else ""} ago'
+    else:
+        weeks = int(seconds / 604800)
+        return f'{weeks} week{"s" if weeks != 1 else ""} ago'

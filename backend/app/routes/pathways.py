@@ -2,51 +2,133 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.pathway import Pathway, PathwayItem, PathwayProgress
+from app.models.story import Story
 from app.models.user import User
-from app.models.contribution import Contribution
+from datetime import datetime
 
 bp = Blueprint('pathways', __name__)
 
 @bp.route('/', methods=['GET'])
 def get_pathways():
-    """Get all published pathways"""
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 20, type=int)
-    category = request.args.get('category')
-    difficulty = request.args.get('difficulty')
+    """Get all active learning pathways"""
+    pathways = Pathway.query.filter_by(is_active=True).all()
     
-    query = Pathway.query.filter_by(published=True)
+    # Get user progress if authenticated
+    user_id = None
+    try:
+        user_id = get_jwt_identity()
+    except:
+        pass
     
-    if category:
-        query = query.filter_by(category=category)
-    if difficulty:
-        query = query.filter_by(difficulty=difficulty)
+    result = []
+    for pathway in pathways:
+        pathway_dict = pathway.to_dict()
+        
+        # Add user progress if logged in
+        if user_id:
+            progress = PathwayProgress.query.filter_by(
+                user_id=user_id,
+                pathway_id=pathway.id
+            ).first()
+            
+            if progress:
+                pathway_dict['completed'] = len(progress.completed_items or [])
+                pathway_dict['user_progress'] = progress.to_dict()
+            else:
+                pathway_dict['completed'] = 0
+                pathway_dict['user_progress'] = None
+        else:
+            pathway_dict['completed'] = 0
+            pathway_dict['user_progress'] = None
+        
+        result.append(pathway_dict)
     
-    pagination = query.order_by(Pathway.created_at.desc()).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
-    
-    return jsonify({
-        'pathways': [pathway.to_dict() for pathway in pagination.items],
-        'total': pagination.total,
-        'pages': pagination.pages,
-        'current_page': page
-    })
+    return jsonify(result)
 
 @bp.route('/<int:pathway_id>', methods=['GET'])
 def get_pathway(pathway_id):
-    """Get a single pathway by ID"""
+    """Get a specific pathway"""
     pathway = Pathway.query.get_or_404(pathway_id)
-    return jsonify(pathway.to_dict())
+    
+    # Get user progress if authenticated
+    user_id = None
+    try:
+        user_id = get_jwt_identity()
+    except:
+        pass
+    
+    pathway_dict = pathway.to_dict()
+    
+    if user_id:
+        progress = PathwayProgress.query.filter_by(
+            user_id=user_id,
+            pathway_id=pathway_id
+        ).first()
+        
+        if progress:
+            pathway_dict['completed'] = len(progress.completed_items or [])
+            pathway_dict['user_progress'] = progress.to_dict()
+        else:
+            pathway_dict['completed'] = 0
+            pathway_dict['user_progress'] = None
+    
+    return jsonify(pathway_dict)
+
+@bp.route('/<int:pathway_id>/progress', methods=['POST'])
+@jwt_required()
+def update_pathway_progress(pathway_id):
+    """Update user's progress on a pathway"""
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    
+    pathway = Pathway.query.get_or_404(pathway_id)
+    story_id = data.get('story_id')
+    
+    if not story_id:
+        return jsonify({'error': 'story_id is required'}), 400
+    
+    # Get or create progress record
+    progress = PathwayProgress.query.filter_by(
+        user_id=user_id,
+        pathway_id=pathway_id
+    ).first()
+    
+    if not progress:
+        progress = PathwayProgress(
+            user_id=user_id,
+            pathway_id=pathway_id,
+            completed_items=[]
+        )
+        db.session.add(progress)
+    
+    # Add story to completed items if not already there
+    completed_items = progress.completed_items or []
+    if story_id not in completed_items:
+        completed_items.append(story_id)
+        progress.completed_items = completed_items
+    
+    # Check if pathway is completed
+    total_items = pathway.items.count()
+    if len(completed_items) >= total_items and not progress.is_completed:
+        progress.is_completed = True
+        progress.completed_at = datetime.utcnow()
+        
+        # Award points
+        user = User.query.get(user_id)
+        user.points += pathway.points_reward
+    
+    db.session.commit()
+    
+    return jsonify(progress.to_dict())
 
 @bp.route('/', methods=['POST'])
 @jwt_required()
 def create_pathway():
-    """Create a new pathway"""
+    """Create a new pathway (admin only)"""
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     
-    if user.role not in ['admin', 'contributor']:
+    if user.role != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
     
     data = request.get_json()
@@ -54,169 +136,35 @@ def create_pathway():
     pathway = Pathway(
         title=data.get('title'),
         description=data.get('description'),
-        thumbnail_url=data.get('thumbnail_url'),
-        difficulty=data.get('difficulty', 'beginner'),
         category=data.get('category'),
-        estimated_duration=data.get('estimated_duration'),
-        published=data.get('published', False),
-        creator_id=user_id
+        difficulty=data.get('difficulty', 'Beginner'),
+        duration=data.get('duration'),
+        points_reward=data.get('points_reward', 50)
     )
     
     db.session.add(pathway)
     db.session.commit()
     
-    # Add pathway items
-    if 'items' in data:
-        for item_data in data['items']:
-            item = PathwayItem(
-                pathway_id=pathway.id,
-                story_id=item_data['story_id'],
-                position=item_data['position'],
-                quiz_data=item_data.get('quiz_data'),
-                reflection_prompt=item_data.get('reflection_prompt')
-            )
-            db.session.add(item)
+    # Add stories to pathway
+    story_ids = data.get('story_ids', [])
+    for index, story_id in enumerate(story_ids):
+        item = PathwayItem(
+            pathway_id=pathway.id,
+            story_id=story_id,
+            order=index + 1
+        )
+        db.session.add(item)
     
     db.session.commit()
     
     return jsonify(pathway.to_dict()), 201
 
-@bp.route('/<int:pathway_id>', methods=['PUT'])
+@bp.route('/user/progress', methods=['GET'])
 @jwt_required()
-def update_pathway(pathway_id):
-    """Update a pathway"""
-    user_id = get_jwt_identity()
-    pathway = Pathway.query.get_or_404(pathway_id)
-    user = User.query.get(user_id)
-    
-    if pathway.creator_id != user_id and user.role != 'admin':
-        return jsonify({'error': 'Unauthorized'}), 403
-    
-    data = request.get_json()
-    
-    if 'title' in data:
-        pathway.title = data['title']
-    if 'description' in data:
-        pathway.description = data['description']
-    if 'difficulty' in data:
-        pathway.difficulty = data['difficulty']
-    if 'category' in data:
-        pathway.category = data['category']
-    if 'published' in data:
-        pathway.published = data['published']
-    
-    db.session.commit()
-    
-    return jsonify(pathway.to_dict())
-
-@bp.route('/<int:pathway_id>', methods=['DELETE'])
-@jwt_required()
-def delete_pathway(pathway_id):
-    """Delete a pathway"""
-    user_id = get_jwt_identity()
-    pathway = Pathway.query.get_or_404(pathway_id)
-    user = User.query.get(user_id)
-    
-    if pathway.creator_id != user_id and user.role != 'admin':
-        return jsonify({'error': 'Unauthorized'}), 403
-    
-    db.session.delete(pathway)
-    db.session.commit()
-    
-    return jsonify({'message': 'Pathway deleted successfully'})
-
-@bp.route('/<int:pathway_id>/start', methods=['POST'])
-@jwt_required()
-def start_pathway(pathway_id):
-    """Start a pathway"""
-    user_id = get_jwt_identity()
-    pathway = Pathway.query.get_or_404(pathway_id)
-    
-    # Check if already started
-    progress = PathwayProgress.query.filter_by(
-        user_id=user_id,
-        pathway_id=pathway_id
-    ).first()
-    
-    if progress:
-        return jsonify({'message': 'Pathway already started', 'progress': progress.to_dict()})
-    
-    # Create new progress record
-    progress = PathwayProgress(
-        user_id=user_id,
-        pathway_id=pathway_id,
-        completed_items=[],
-        current_item_id=pathway.items[0].id if pathway.items else None
-    )
-    
-    db.session.add(progress)
-    db.session.commit()
-    
-    return jsonify({'message': 'Pathway started', 'progress': progress.to_dict()}), 201
-
-@bp.route('/<int:pathway_id>/progress', methods=['POST'])
-@jwt_required()
-def update_progress(pathway_id):
-    """Update pathway progress"""
-    user_id = get_jwt_identity()
-    data = request.get_json()
-    
-    progress = PathwayProgress.query.filter_by(
-        user_id=user_id,
-        pathway_id=pathway_id
-    ).first_or_404()
-    
-    item_id = data.get('item_id')
-    
-    if item_id and item_id not in progress.completed_items:
-        progress.completed_items.append(item_id)
-    
-    # Check if pathway is completed
-    pathway = Pathway.query.get(pathway_id)
-    total_items = len(pathway.items)
-    
-    if len(progress.completed_items) >= total_items:
-        progress.completed = True
-        progress.completion_date = datetime.utcnow()
-        
-        # Award points
-        user = User.query.get(user_id)
-        contribution = Contribution(
-            user_id=user_id,
-            contribution_type='pathway_completed',
-            points_earned=50
-        )
-        user.points += 50
-        db.session.add(contribution)
-    
-    db.session.commit()
-    
-    return jsonify({'message': 'Progress updated', 'completed': progress.completed})
-
-@bp.route('/<int:pathway_id>/progress', methods=['GET'])
-@jwt_required()
-def get_progress(pathway_id):
-    """Get pathway progress"""
+def get_user_progress():
+    """Get all pathway progress for current user"""
     user_id = get_jwt_identity()
     
-    progress = PathwayProgress.query.filter_by(
-        user_id=user_id,
-        pathway_id=pathway_id
-    ).first()
+    progress_records = PathwayProgress.query.filter_by(user_id=user_id).all()
     
-    if not progress:
-        return jsonify({'started': False})
-    
-    pathway = Pathway.query.get(pathway_id)
-    total_items = len(pathway.items)
-    completed_items = len(progress.completed_items)
-    
-    return jsonify({
-        'started': True,
-        'completed': progress.completed,
-        'total_items': total_items,
-        'completed_items': completed_items,
-        'progress_percentage': (completed_items / total_items * 100) if total_items > 0 else 0,
-        'completion_date': progress.completion_date.isoformat() if progress.completion_date else None
-    })
-
+    return jsonify([p.to_dict() for p in progress_records])
