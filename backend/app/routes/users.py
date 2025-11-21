@@ -69,7 +69,7 @@ def login():
         return jsonify({'error': 'Invalid credentials'}), 401
     
     # Verify password
-    if not bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
+    if not bcrypt.checkpw(data['password'].encode('utf-8'), user.password_hash.encode('utf-8')):
         return jsonify({'error': 'Invalid credentials'}), 401
     
     from flask_jwt_extended import create_access_token
@@ -101,13 +101,13 @@ def register():
     ).decode('utf-8')
     
     user = User(
-        email=data['email'],
-        password=hashed_password,
-        full_name=data['full_name'],
-        username=data['username'],
-        role='user',
-        county=data.get('county')
-    )
+    email=data['email'],
+    password_hash=hashed_password,
+    full_name=data['full_name'],
+    username=data['username'],
+    role='user',
+    county=data.get('county')
+)
     
     db.session.add(user)
     db.session.commit()

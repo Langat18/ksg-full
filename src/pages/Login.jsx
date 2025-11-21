@@ -248,12 +248,12 @@ const Login = () => {
                   <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <div>
+                   <div>
                     <p className="text-sm font-semibold text-blue-900 mb-2">Test Credentials</p>
                     <div className="text-xs text-blue-800 space-y-1">
                       <p><strong>Email:</strong> test@ksg.ac.ke</p>
                       <p><strong>Password:</strong> password123</p>
-                      <p className="mt-2 text-blue-600">This account has admin privileges</p>
+                      <p className="mt-2 text-blue-600">This account has admin privileges</p> 
                     </div>
                   </div>
                 </div>

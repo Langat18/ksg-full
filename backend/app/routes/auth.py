@@ -66,7 +66,7 @@ def login():
         return jsonify({'error': 'Invalid credentials'}), 401
     
     # Verify password
-    if not bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
+    if not bcrypt.checkpw(data['password'].encode('utf-8'), user.password_hash.encode('utf-8')):
         return jsonify({'error': 'Invalid credentials'}), 401
     
     # Create access token
