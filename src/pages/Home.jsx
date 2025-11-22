@@ -7,33 +7,101 @@ const Home = () => {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [featuredStory, setFeaturedStory] = useState(null);
+  const [stats, setStats] = useState({
+    storiesShared: 0,
+    countiesCovered: 0,
+    contributors: 0,
+    policyAreas: 0
+  });
+  const [categories, setCategories] = useState([
+    { name: 'Alumni Impact', count: 0, icon: '🎓' },
+    { name: 'Policy in Action', count: 0, icon: '📊' },
+    { name: 'Research Brief', count: 0, icon: '🔬' },
+    { name: 'From the Classroom', count: 0, icon: '📚' },
+  ]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchStories({ limit: 12 })
-      .then((data) => {
-        const storiesData = data.results ?? data;
-        setStories(storiesData);
-        if (storiesData.length > 0) {
-          setFeaturedStory(storiesData[0]);
+    const fetchHomeData = async () => {
+      setLoading(true);
+      try {
+        // Fetch stories
+        const storiesData = await fetchStories({ limit: 12 });
+        const storiesArray = storiesData.results ?? storiesData;
+        setStories(storiesArray);
+        
+        if (storiesArray.length > 0) {
+          setFeaturedStory(storiesArray[0]);
         }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+
+        // Fetch analytics for real stats
+        try {
+          const analyticsResponse = await fetch('http://localhost:5000/api/analytics/summary');
+          if (analyticsResponse.ok) {
+            const analytics = await analyticsResponse.json();
+            
+            setStats({
+              storiesShared: analytics.total_stories || storiesArray.length,
+              countiesCovered: analytics.counties_covered || 0,
+              contributors: analytics.active_users || 0,
+              policyAreas: analytics.hot_topics?.length || 0
+            });
+
+            // Update category counts from real data
+            if (analytics.hot_topics && analytics.hot_topics.length > 0) {
+              setCategories(prevCategories => 
+                prevCategories.map(cat => {
+                  const topic = analytics.hot_topics.find(t => t.topic === cat.name);
+                  return {
+                    ...cat,
+                    count: topic ? topic.count : 0
+                  };
+                })
+              );
+            }
+          } else {
+            throw new Error('Analytics endpoint not available');
+          }
+        } catch (analyticsError) {
+          console.log('Using fallback stats from stories');
+          // Fallback to story-based counts
+          setStats({
+            storiesShared: storiesArray.length,
+            countiesCovered: new Set(storiesArray.map(s => s.county).filter(Boolean)).size,
+            contributors: new Set(storiesArray.map(s => s.author?.id).filter(Boolean)).size,
+            policyAreas: new Set(storiesArray.map(s => s.category).filter(Boolean)).size
+          });
+
+          // Count categories from stories
+          const categoryCounts = {};
+          storiesArray.forEach(story => {
+            if (story.category) {
+              categoryCounts[story.category] = (categoryCounts[story.category] || 0) + 1;
+            }
+          });
+
+          setCategories(prevCategories =>
+            prevCategories.map(cat => ({
+              ...cat,
+              count: categoryCounts[cat.name] || 0
+            }))
+          );
+        }
+        
+      } catch (error) {
+        console.error('Failed to fetch home data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeData();
   }, []);
 
-  const categories = [
-    { name: 'Alumni Impact', count: '12+', icon: '🎓' },
-    { name: 'Policy in Action', count: '8+', icon: '📊' },
-    { name: 'Research Brief', count: '15+', icon: '🔬' },
-    { name: 'From the Classroom', count: '20+', icon: '📚' },
-  ];
-
-  const stats = [
-    { label: 'Stories Shared', value: '45+' },
-    { label: 'Counties Covered', value: '47' },
-    { label: 'Alumni Featured', value: '30+' },
-    { label: 'Policy Areas', value: '12+' },
+  const statsDisplay = [
+    { label: 'Stories Shared', value: stats.storiesShared },
+    { label: 'Counties Covered', value: `${stats.countiesCovered}/47` },
+    { label: 'Contributors', value: stats.contributors },
+    { label: 'Policy Areas', value: stats.policyAreas },
   ];
 
   return (
@@ -45,43 +113,34 @@ const Home = () => {
           alt="KSG Homepage" 
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black/40">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#235D4C]/90 to-[#235D4C]/60">
           <div className="container-ksg-max h-full flex items-center">
             <div className="max-w-5xl mx-auto text-center animate-ksg-fade-in-up">
               <div className="mb-6">
                 <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium mb-6 text-white">
-                  <div className="h-2 w-2 bg-ksg-gold rounded-full mr-2 animate-pulse"></div>
+                  <div className="h-2 w-2 bg-[#B5955B] rounded-full mr-2 animate-pulse"></div>
                   Kenya School of Government Digital Platform
                 </div>
               </div>
-              <h1 className="text-4xl md:text-6xl xl:text-7xl font-bold mb-8 leading-tight text-white">
-                Empowering The Public Service Through 
-                <span className="block text-white mt-2">
-                  Shared Stories
-                </span>
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                Transforming Kenya Through<br />
+                <span className="text-[#B5955B]">Shared Stories</span>
               </h1>
-              <p className="text-xl md:text-2xl text-white/90 mb-12 leading-relaxed max-w-4xl mx-auto">
-                Discover multimedia narratives from KSG's community of leaders, showcasing 
-                innovation, policy impact, and transformational governance across all 47 counties.
+              <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Discover authentic narratives of leadership, innovation, and impact from across Kenya's 47 counties
               </p>
-              <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
-                <Link 
-                  to="/submit" 
-                  className="btn-ksg-primary transform hover:scale-105 inline-flex items-center"
-                >
-                  <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Share Your Story
-                </Link>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link 
                   to="/search" 
-                  className="btn-ksg-secondary !text-white inline-flex items-center"
+                  className="btn-ksg-primary text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
                 >
-                  <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
                   Explore Stories
+                </Link>
+                <Link 
+                  to="/submit" 
+                  className="btn-ksg-secondary text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
+                >
+                  Share Your Impact
                 </Link>
               </div>
             </div>
@@ -89,7 +148,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* KSG-Inspired Statistics Section */}
+      {/* Statistics Section - NOW WITH REAL DATA */}
       <section className="section-ksg-padding bg-white">
         <div className="container-ksg-max">
           <div className="text-center mb-12">
@@ -100,8 +159,8 @@ const Home = () => {
               Building a knowledge network that connects leaders and communities nationwide
             </p>
           </div>
-          <div className="grid-ksg-features">
-            {stats.map((stat, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {statsDisplay.map((stat, index) => (
               <div key={index} className="stat-ksg animate-ksg-slide-in-right" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="stat-ksg-number">
                   {stat.value}
@@ -115,8 +174,94 @@ const Home = () => {
         </div>
       </section>
 
-      {/* KSG-Inspired Categories Section */}
-      <section className="section-ksg-padding">
+      {/* Featured Story */}
+      {featuredStory && (
+        <section className="section-ksg-padding">
+          <div className="container-ksg-max">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Featured Story
+              </h2>
+              <p className="text-xl text-gray-600">
+                Highlighting transformational narratives from our community
+              </p>
+            </div>
+            <div className="card-ksg-featured hover:shadow-2xl transition-shadow duration-300">
+              <Link to={`/story/${featuredStory.id}`}>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="relative h-64 md:h-full rounded-lg overflow-hidden">
+                    {featuredStory.thumbnail_url || featuredStory.media_url ? (
+                      <img 
+                        src={`http://localhost:5000${featuredStory.thumbnail_url || featuredStory.media_url}`}
+                        alt={featuredStory.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = '/assets/placeholder.jpg';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-[#235D4C] to-[#B5955B] flex items-center justify-center">
+                        <svg className="h-20 w-20 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                      </div>
+                    )}
+                    <div className="absolute top-4 left-4">
+                      <span className="tag-ksg bg-[#B5955B] text-white">Featured</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <div className="mb-4">
+                      {featuredStory.category && (
+                        <span className="tag-ksg">{featuredStory.category}</span>
+                      )}
+                      {featuredStory.county && (
+                        <span className="tag-ksg ml-2">
+                          <svg className="inline h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          </svg>
+                          {featuredStory.county}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 group-hover:text-blue-700 transition-colors">
+                      {featuredStory.title}
+                    </h3>
+                    <p className="text-gray-600 text-lg mb-6 line-clamp-3">
+                      {featuredStory.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <div className="flex items-center space-x-1">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span>{featuredStory.views || 0} views</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>
+                          <span>{featuredStory.likes || 0} likes</span>
+                        </div>
+                      </div>
+                      <span className="text-[#B5955B] font-medium flex items-center">
+                        Read More
+                        <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Categories Section - NOW WITH REAL COUNTS */}
+      <section className="section-ksg-padding bg-gray-50">
         <div className="container-ksg-max">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -142,7 +287,7 @@ const Home = () => {
                   </h3>
                   <div className="flex items-center justify-center mb-4">
                     <span className="tag-ksg">
-                      {category.count} Stories
+                      {category.count} {category.count === 1 ? 'Story' : 'Stories'}
                     </span>
                   </div>
                   <p className="text-gray-600 mb-4">
@@ -161,103 +306,97 @@ const Home = () => {
         </div>
       </section>
 
-      {/* KSG-Inspired Recent Stories Section */}
-      <section className="section-ksg-padding bg-gray-50">
+      {/* Recent Stories */}
+      <section className="section-ksg-padding">
         <div className="container-ksg-max">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
-            <div className="mb-6 md:mb-0">
+          <div className="flex items-center justify-between mb-12">
+            <div>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Latest Impact Stories
+                Latest Stories
               </h2>
-              <p className="text-xl text-gray-600 max-w-2xl">
-                Recent narratives from KSG's community of leaders and changemakers
+              <p className="text-xl text-gray-600">
+                Fresh narratives from our community
               </p>
             </div>
-            <Link
-              to="/search"
-              className="btn-ksg-outline inline-flex items-center"
-            >
+            <Link to="/search" className="btn-ksg-secondary hidden md:inline-flex">
               View All Stories
-              <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
             </Link>
           </div>
 
           {loading ? (
             <div className="grid-ksg-cards">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="card-ksg animate-ksg-pulse">
-                  <div className="skeleton-ksg h-6 w-3/4 mb-4"></div>
-                  <div className="skeleton-ksg h-4 w-full mb-3"></div>
-                  <div className="skeleton-ksg h-4 w-2/3 mb-4"></div>
-                  <div className="flex justify-between items-center">
-                    <div className="skeleton-ksg h-3 w-1/4"></div>
-                    <div className="skeleton-ksg h-3 w-1/6"></div>
-                  </div>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="card-ksg animate-pulse">
+                  <div className="skeleton-ksg h-48 w-full mb-4"></div>
+                  <div className="skeleton-ksg h-6 w-3/4 mb-2"></div>
+                  <div className="skeleton-ksg h-4 w-full mb-2"></div>
+                  <div className="skeleton-ksg h-4 w-5/6"></div>
                 </div>
+              ))}
+            </div>
+          ) : stories.length > 0 ? (
+            <div className="grid-ksg-cards">
+              {stories.slice(0, 6).map((story) => (
+                <StoryCard key={story.id} story={story} />
               ))}
             </div>
           ) : (
-            <div className="grid-ksg-cards">
-              {stories.slice(0, 6).map((story, index) => (
-                <div key={story.id} className="animate-ksg-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <StoryCard story={story} />
-                </div>
-              ))}
+            <div className="text-center py-12">
+              <svg className="mx-auto h-24 w-24 text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Stories Yet</h3>
+              <p className="text-gray-600 mb-6">Be the first to share a transformational story!</p>
+              <Link to="/submit" className="btn-ksg-primary">
+                Share Your Story
+              </Link>
             </div>
           )}
+
+          <div className="text-center mt-8 md:hidden">
+            <Link to="/search" className="btn-ksg-secondary w-full">
+              View All Stories
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* KSG-Inspired Call to Action */}
-      <section className="relative text-white rounded-2xl overflow-hidden mx-4 sm:mx-6 lg:mx-8 py-20">
-        <img 
-          src="/assets/homepage.png" 
-          alt="KSG Call to Action" 
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/60">
-          <div className="relative z-10 h-full flex items-center">
-            <div className="container-ksg-max">
-              <div className="max-w-4xl mx-auto text-center">
-                <div className="mb-6">
-                  <svg className="mx-auto h-16 w-16 text-ksg-gold mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-                <h2 className="text-3xl md:text-5xl font-bold mb-6">
-                  Ready to Share Your Impact?
-                </h2>
-              <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
-                Join KSG's knowledge network by sharing your experiences, innovations, 
-                and insights that are transforming communities across Kenya.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  to="/submit"
-                  className="bg-ksg-gold hover:bg-ksg-goldDark text-white transform hover:scale-105 inline-flex items-center text-lg px-8 py-4 rounded-md transition-all duration-200"
-                >
-                  <svg className="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                  Share Your Story
-                </Link>
-                <Link
-                  to="/search"
-                  className="border-2 border-white hover:bg-white hover:text-ksg-gold text-white inline-flex items-center text-lg px-8 py-4 rounded-md transition-all duration-200"
-                >
-                  <svg className="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V13a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                  Browse Archive
-                </Link>
-              </div>
-              </div>
+      {/* Call to Action */}
+      <section className="section-ksg-padding bg-gradient-to-br from-[#235D4C] to-[#1a4438]">
+        <div className="container-ksg-max">
+          <div className="text-center text-white max-w-4xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Have a Story to Share?
+            </h2>
+            <p className="text-xl text-white/90 mb-8 leading-relaxed">
+              Join thousands of Kenyans sharing their transformational journeys. Your experience could inspire 
+              policy change, spark innovation, or empower communities across the nation.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link 
+                to="/submit" 
+                className="inline-flex items-center px-8 py-4 bg-[#B5955B] hover:bg-[#B5955B]/90 text-white rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
+              >
+                <svg className="mr-2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                Submit Your Story
+              </Link>
+              <Link 
+                to="/about" 
+                className="inline-flex items-center px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold text-lg transition-all border-2 border-white/30"
+              >
+                Learn More
+                <svg className="ml-2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             </div>
           </div>
         </div>
       </section>
     </div>
   );
-};export default Home;
+};
+
+export default Home;

@@ -17,7 +17,8 @@ class Config:
     
     # File Upload Configuration
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
-    MAX_CONTENT_LENGTH = int(os.getenv('MAX_CONTENT_LENGTH', 524288000))
+    MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB limit
+    ALLOWED_EXTENSIONS = {'mp4', 'mp3', 'wav', 'm4a', 'pdf', 'docx', 'jpg', 'jpeg', 'png'}
     
     # Neo4j Configuration
     NEO4J_URI = os.getenv('NEO4J_URI')
@@ -35,6 +36,7 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
+    MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB in production
 
 config = {
     'development': DevelopmentConfig,

@@ -8,13 +8,14 @@ from app.services.nlp_service import NLPService
 from app.services.graph_service import GraphService
 import os
 from werkzeug.utils import secure_filename
+from datetime import datetime
 
 bp = Blueprint('stories', __name__)
 nlp_service = NLPService()
 graph_service = GraphService()
 
 def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'mp4', 'mp3', 'pdf', 'docx', 'wav', 'm4a'}
+    ALLOWED_EXTENSIONS = {'mp4', 'mp3', 'pdf', 'docx', 'wav', 'm4a', 'jpg', 'jpeg', 'png'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @bp.route('/', methods=['GET'])
@@ -27,7 +28,7 @@ def get_stories():
     category = request.args.get('category')
     status = request.args.get('status', 'published')
     search = request.args.get('search')
-    q = request.args.get('q')  # Alternative search parameter
+    q = request.args.get('q')
     
     query = Story.query.filter_by(status=status)
     
@@ -45,7 +46,6 @@ def get_stories():
             )
         )
     
-    # If limit is specified, use it instead of pagination
     if limit and limit != per_page:
         stories = query.order_by(Story.created_at.desc()).limit(limit).all()
         return jsonify({
@@ -82,13 +82,11 @@ def get_related_stories(story_id):
     """Get related stories based on category, county, and tags"""
     story = Story.query.get_or_404(story_id)
     
-    # Find stories with same category or county, excluding the current story
     related_query = Story.query.filter(
         Story.id != story_id,
         Story.status == 'published'
     )
     
-    # Prioritize stories with same category or county
     if story.category or story.county:
         related_query = related_query.filter(
             db.or_(
@@ -97,10 +95,8 @@ def get_related_stories(story_id):
             )
         )
     
-    # Get up to 5 related stories, ordered by views
     related = related_query.order_by(Story.views.desc()).limit(5).all()
     
-    # If we don't have enough related stories, get some random recent ones
     if len(related) < 3:
         additional = Story.query.filter(
             Story.id != story_id,
@@ -113,7 +109,7 @@ def get_related_stories(story_id):
 @bp.route('/', methods=['POST'])
 @jwt_required()
 def create_story():
-    """Create a new story"""
+    """Create a new story with file size validation"""
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     
@@ -122,25 +118,55 @@ def create_story():
     
     data = request.form
     
-    # Handle file upload
+    # Ensure upload folder exists
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    os.makedirs(upload_folder, exist_ok=True)
+    
+    # Handle file upload with size validation
     media_url = None
     thumbnail_url = None
     
     if 'media_file' in request.files:
         media_file = request.files['media_file']
-        if media_file and allowed_file(media_file.filename):
-            filename = secure_filename(media_file.filename)
-            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            media_file.save(filepath)
-            media_url = f'/uploads/{filename}'
+        if media_file and media_file.filename:
+            # Check file size (50MB = 52428800 bytes)
+            media_file.seek(0, os.SEEK_END)
+            file_length = media_file.tell()
+            media_file.seek(0)
+            
+            max_size = 50 * 1024 * 1024  # 50MB
+            if file_length > max_size:
+                return jsonify({
+                    'error': f'File size ({file_length / (1024*1024):.1f}MB) exceeds maximum allowed size of 50MB'
+                }), 413
+            
+            if allowed_file(media_file.filename):
+                filename = secure_filename(media_file.filename)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"{timestamp}_{filename}"
+                filepath = os.path.join(upload_folder, filename)
+                media_file.save(filepath)
+                media_url = f'/uploads/{filename}'
+            else:
+                return jsonify({'error': 'File type not allowed'}), 400
     
     if 'thumbnail' in request.files:
         thumbnail = request.files['thumbnail']
-        if thumbnail and allowed_file(thumbnail.filename):
-            filename = secure_filename(thumbnail.filename)
-            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            thumbnail.save(filepath)
-            thumbnail_url = f'/uploads/{filename}'
+        if thumbnail and thumbnail.filename:
+            thumbnail.seek(0, os.SEEK_END)
+            file_length = thumbnail.tell()
+            thumbnail.seek(0)
+            
+            if file_length > 5 * 1024 * 1024:  # 5MB for thumbnails
+                return jsonify({'error': 'Thumbnail size exceeds 5MB'}), 413
+            
+            if allowed_file(thumbnail.filename):
+                filename = secure_filename(thumbnail.filename)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"{timestamp}_thumb_{filename}"
+                filepath = os.path.join(upload_folder, filename)
+                thumbnail.save(filepath)
+                thumbnail_url = f'/uploads/{filename}'
     
     # Extract text for NLP processing
     text_content = data.get('description', '') + ' ' + data.get('transcript', '')
@@ -199,7 +225,6 @@ def update_story(story_id):
     
     data = request.get_json()
     
-    # Update fields
     if 'title' in data:
         story.title = data['title']
     if 'description' in data:
@@ -243,7 +268,6 @@ def share_story(story_id):
     
     story.shares += 1
     
-    # Award points for sharing
     contribution = Contribution(
         user_id=user_id,
         story_id=story_id,
@@ -282,7 +306,7 @@ def get_featured_stories():
 @bp.route('/trending', methods=['GET'])
 def get_trending_stories():
     """Get trending stories based on recent engagement"""
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     week_ago = datetime.utcnow() - timedelta(days=7)
     
     stories = Story.query.filter(

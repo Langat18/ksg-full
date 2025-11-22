@@ -8,10 +8,21 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
   const [bookmarks, setBookmarks] = useState([]);
   const mediaRef = useRef(null);
 
+  // CRITICAL: Get full media URL
+  const getMediaUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `http://localhost:5000${url}`;
+  };
+
+  const mediaUrl = getMediaUrl(story.media_url);
+  const thumbnailUrl = getMediaUrl(story.thumbnail_url);
+  const isMediaVideo = story.content_type === 'video';
+
   // Parse transcript into segments (if available)
   const transcriptSegments = story.transcript ? 
     story.transcript.split('\n').filter(line => line.trim()).map((line, index) => ({
-      startTime: index * 30, // Rough estimate: 30 seconds per segment
+      startTime: index * 30,
       endTime: (index + 1) * 30,
       text: line.trim()
     })) : [];
@@ -38,6 +49,7 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
   }, []);
 
   const formatTime = (seconds) => {
+    if (!seconds || isNaN(seconds)) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -45,6 +57,7 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
 
   const handlePlayPause = () => {
     const media = mediaRef.current;
+    if (!media) return;
     if (isPlaying) {
       media.pause();
     } else {
@@ -54,6 +67,7 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
 
   const seekTo = (time) => {
     const media = mediaRef.current;
+    if (!media) return;
     media.currentTime = time;
   };
 
@@ -89,29 +103,52 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
     if (onShare) onShare(shareData);
   };
 
-  const isMediaVideo = story.content_type === 'video';
+  // Show message if no media available
+  if (!mediaUrl) {
+    return (
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden p-8 text-center">
+        <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+        <p className="text-gray-600">No media file available for this story</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Media Player */}
       <div className="relative bg-black">
-        {isMediaVideo && story.media_url ? (
+        {isMediaVideo ? (
           <video
             ref={mediaRef}
             className="w-full h-64 md:h-96"
-            src={story.media_url}
-            poster={story.thumbnail_url}
+            src={mediaUrl}
+            poster={thumbnailUrl}
+            controls
+            onError={(e) => {
+              console.error('Video load error:', e);
+              e.target.style.display = 'none';
+            }}
           >
             Your browser does not support the video tag.
           </video>
         ) : (
           <div className="w-full h-64 md:h-96 bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center">
-            <audio
-              ref={mediaRef}
-              src={story.media_url}
-              className="hidden"
-            />
-            <div className="text-center text-white px-4">
+            <div className="w-full px-8">
+              <audio
+                ref={mediaRef}
+                src={mediaUrl}
+                controls
+                className="w-full"
+                onError={(e) => {
+                  console.error('Audio load error:', e);
+                }}
+              >
+                Your browser does not support the audio tag.
+              </audio>
+            </div>
+            <div className="absolute top-1/4 text-center text-white px-4">
               <div className="h-20 w-20 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center">
                 <svg className="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
@@ -123,66 +160,68 @@ const ImmersivePlayer = ({ story, onBookmark, onShare }) => {
           </div>
         )}
 
-        {/* Player Controls Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-          {/* Progress Bar */}
-          <div className="w-full bg-white/30 rounded-full h-2 mb-4 cursor-pointer"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const percent = (e.clientX - rect.left) / rect.width;
-              seekTo(percent * duration);
-            }}
-          >
-            <div
-              className="bg-white rounded-full h-2 transition-all duration-300"
-              style={{ width: `${(currentTime / duration) * 100}%` }}
-            />
-          </div>
-
-          {/* Control Buttons */}
-          <div className="flex items-center justify-between text-white">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={handlePlayPause}
-                className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
-              >
-                {isPlaying ? (
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                  </svg>
-                ) : (
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                )}
-              </button>
-
-              <button
-                onClick={addBookmark}
-                className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
-                title="Bookmark this moment"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              </button>
-
-              <button
-                onClick={shareCurrentTime}
-                className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
-                title="Share this moment"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                </svg>
-              </button>
+        {/* Player Controls Overlay - Only show for custom controls */}
+        {!isMediaVideo && (
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+            {/* Progress Bar */}
+            <div className="w-full bg-white/30 rounded-full h-2 mb-4 cursor-pointer"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                seekTo(percent * duration);
+              }}
+            >
+              <div
+                className="bg-white rounded-full h-2 transition-all duration-300"
+                style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+              />
             </div>
 
-            <div className="text-sm">
-              {formatTime(currentTime)} / {formatTime(duration)}
+            {/* Control Buttons */}
+            <div className="flex items-center justify-between text-white">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={handlePlayPause}
+                  className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
+                >
+                  {isPlaying ? (
+                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                  ) : (
+                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  )}
+                </button>
+
+                <button
+                  onClick={addBookmark}
+                  className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
+                  title="Bookmark this moment"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={shareCurrentTime}
+                  className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
+                  title="Share this moment"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="text-sm">
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Interactive Transcript */}

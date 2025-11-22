@@ -7,11 +7,15 @@ const Login = () => {
     email: '',
     password: '',
     name: '',
-    role: ''
+    role: '',
+    county: '' // ADDED - User must select county
   });
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const { login, register, isAuthenticated } = useAuth();
 
   // Redirect if already authenticated
@@ -27,13 +31,23 @@ const Login = () => {
     'Other'
   ];
 
+  // KENYAN COUNTIES - Complete list
+  const kenyanCounties = [
+    'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Garissa',
+    'Homa Bay', 'Isiolo', 'Kajiado', 'Kakamega', 'Kericho', 'Kiambu', 'Kilifi',
+    'Kirinyaga', 'Kisii', 'Kisumu', 'Kitui', 'Kwale', 'Laikipia', 'Lamu', 'Machakos',
+    'Makueni', 'Mandera', 'Marsabit', 'Meru', 'Migori', 'Mombasa', 'Murang\'a',
+    'Nairobi', 'Nakuru', 'Nandi', 'Narok', 'Nyamira', 'Nyandarua', 'Nyeri',
+    'Samburu', 'Siaya', 'Taita-Taveta', 'Tana River', 'Tharaka-Nithi', 'Trans Nzoia',
+    'Turkana', 'Uasin Gishu', 'Vihiga', 'Wajir', 'West Pokot'
+  ];
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    // Clear error when user types
     if (error) setError('');
   };
 
@@ -41,18 +55,32 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccessMessage('');
     
     try {
       if (isRegistering) {
+        // Validation for registration
+        if (!formData.county) {
+          setError('Please select your county');
+          setLoading(false);
+          return;
+        }
+
+        if (formData.password.length < 8) {
+          setError('Password must be at least 8 characters');
+          setLoading(false);
+          return;
+        }
+
         // Register new user
         const result = await register({
           email: formData.email,
-          username: formData.email.split('@')[0], // Generate username from email
+          username: formData.email.split('@')[0],
           password: formData.password,
           full_name: formData.name,
           role: 'user',
-          organization: 'Kenya School of Government',
-          county: 'Nairobi' // Default, can be updated in profile
+          organization: formData.role || 'Kenya School of Government',
+          county: formData.county // IMPORTANT: Send county
         });
 
         if (!result.success) {
@@ -73,6 +101,100 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/users/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccessMessage('Password reset instructions sent to your email');
+        setTimeout(() => {
+          setShowForgotPassword(false);
+          setResetEmail('');
+        }, 3000);
+      } else {
+        setError(data.error || 'Failed to send reset email');
+      }
+    } catch (error) {
+      setError('Failed to connect to server');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Forgot Password Form
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center section-ksg-padding">
+        <div className="max-w-md w-full mx-auto">
+          <div className="text-center mb-8">
+            <div className="mx-auto h-20 w-20 bg-gradient-to-br from-[#235D4C] to-[#B5955B] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+              <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-3">Reset Password</h2>
+            <p className="text-gray-600">Enter your email to receive reset instructions</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-8 border-2 border-[#235D4C]/10">
+            {error && (
+              <div className="mb-6 bg-red-50 border-2 border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="mb-6 bg-green-50 border-2 border-green-400 text-green-700 px-4 py-3 rounded-lg">
+                {successMessage}
+              </div>
+            )}
+
+            <form onSubmit={handleForgotPassword} className="space-y-6">
+              <div>
+                <label className="form-ksg-label">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 placeholder-gray-400 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200"
+                  placeholder="your.email@ksg.ac.ke"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 px-6 bg-[#B5955B] hover:bg-[#B5955B]/90 text-white rounded-lg font-semibold transition-all disabled:opacity-50"
+              >
+                {loading ? 'Sending...' : 'Send Reset Link'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(false)}
+                className="w-full text-[#235D4C] hover:text-[#B5955B] font-medium"
+              >
+                ← Back to Login
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center section-ksg-padding">
@@ -174,6 +296,31 @@ const Login = () => {
               )}
             </div>
 
+            {/* COUNTY FIELD - Only for registration - CRITICAL FIX */}
+            {isRegistering && (
+              <div className="form-ksg-group">
+                <label htmlFor="county" className="form-ksg-label">
+                  Your County *
+                </label>
+                <select
+                  id="county"
+                  name="county"
+                  required
+                  value={formData.county}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
+                >
+                  <option value="">Select your county</option>
+                  {kenyanCounties.map(county => (
+                    <option key={county} value={county}>{county}</option>
+                  ))}
+                </select>
+                <div className="mt-2 text-sm text-[#235D4C]/70">
+                  This helps us connect you with stories from your region
+                </div>
+              </div>
+            )}
+
             {/* Role Field - Only for registration */}
             {isRegistering && (
               <div className="form-ksg-group">
@@ -223,6 +370,19 @@ const Login = () => {
               )}
             </button>
 
+            {/* Forgot Password Link - Only show in login mode */}
+            {!isRegistering && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-[#235D4C] hover:text-[#B5955B] font-medium transition-colors"
+                >
+                  Forgot your password?
+                </button>
+              </div>
+            )}
+
             {/* Toggle between Login/Register */}
             <div className="text-center pt-4 border-t border-gray-200">
               <button
@@ -248,12 +408,12 @@ const Login = () => {
                   <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                   <div>
+                  <div>
                     <p className="text-sm font-semibold text-blue-900 mb-2">Test Credentials</p>
                     <div className="text-xs text-blue-800 space-y-1">
                       <p><strong>Email:</strong> test@ksg.ac.ke</p>
                       <p><strong>Password:</strong> password123</p>
-                      <p className="mt-2 text-blue-600">This account has admin privileges</p> 
+                      <p className="mt-2 text-blue-600">This account has admin privileges</p>
                     </div>
                   </div>
                 </div>

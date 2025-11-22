@@ -14,9 +14,13 @@ class User(db.Model):
     
     # Profile information
     organization = db.Column(db.String(120))
-    county = db.Column(db.String(50))
+    county = db.Column(db.String(50))  # NO DEFAULT - user must select
     bio = db.Column(db.Text)
     profile_image = db.Column(db.String(255))
+    
+    # Password reset
+    reset_token = db.Column(db.String(100))
+    reset_token_expiry = db.Column(db.DateTime)
     
     # Gamification
     points = db.Column(db.Integer, default=0)

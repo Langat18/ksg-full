@@ -4,29 +4,41 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const UserDashboard = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
   const [badges, setBadges] = useState([]);
 
   useEffect(() => {
-    if (token && user) {
+    if (user) {
       fetchDashboardData();
     }
-  }, [token, user]);
+  }, [user]);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
+      setError(null);
       
+      // Add token to axios headers
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('No authentication token found');
+        setLoading(false);
+        return;
+      }
+
       // Fetch user profile with stats
-      const profileResponse = await axios.get('http://localhost:5000/api/users/profile');
+      const profileResponse = await axios.get('http://localhost:5000/api/users/profile', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const userData = profileResponse.data;
       
       // Fetch user's stories
-      const storiesResponse = await axios.get('http://localhost:5000/api/stories/', {
-        params: { author_id: userData.id }
+      const storiesResponse = await axios.get(`http://localhost:5000/api/users/${userData.id}/stories`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       const userStories = storiesResponse.data.stories || [];
       
@@ -38,8 +50,8 @@ const UserDashboard = () => {
       setStats({
         totalPoints: userData.points || 0,
         storiesContributed: userStories.length,
-        storiesViewed: 0, // This would need a separate endpoint
-        pathwaysCompleted: 0, // This would need a separate endpoint
+        storiesViewed: 0,
+        pathwaysCompleted: 0,
         totalViews: totalViews,
         totalShares: totalShares,
         totalLikes: totalLikes,
@@ -87,18 +99,17 @@ const UserDashboard = () => {
         }
       ]);
       
-      // Set recent activity (mock for now, would need real endpoint)
-      setRecentActivity([
-        { 
-          type: 'contribution', 
-          title: `Shared "${userStories[0]?.title || 'your story'}"`, 
-          points: 50, 
-          date: formatDate(userStories[0]?.created_at) 
-        }
-      ]);
+      // Set recent activity
+      setRecentActivity(userStories.slice(0, 5).map(story => ({
+        type: 'contribution',
+        title: `Shared "${story.title}"`,
+        points: 50,
+        date: formatDate(story.created_at)
+      })));
       
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
+      setError('Failed to load dashboard data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -160,11 +171,20 @@ const UserDashboard = () => {
     );
   }
 
-  if (!stats) {
+  if (error || !stats) {
     return (
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="text-center py-12">
-          <p className="text-gray-600">Failed to load dashboard data.</p>
+          <svg className="mx-auto h-16 w-16 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-gray-600 mb-4">{error || 'Failed to load dashboard data.'}</p>
+          <button
+            onClick={fetchDashboardData}
+            className="bg-[#B5955B] hover:bg-[#B5955B]/90 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
