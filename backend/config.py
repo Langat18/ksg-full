@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# Get the absolute path to the backend directory
+basedir = os.path.abspath(os.path.dirname(__file__))
+
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
@@ -15,8 +18,8 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     
-    # File Upload Configuration
-    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
+    # File Upload Configuration - FIXED: Use absolute path
+    UPLOAD_FOLDER = os.path.join(basedir, 'uploads')  # Now: /full/path/to/backend/uploads
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB limit
     ALLOWED_EXTENSIONS = {'mp4', 'mp3', 'wav', 'm4a', 'pdf', 'docx', 'jpg', 'jpeg', 'png'}
     
