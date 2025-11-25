@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchStory, fetchRelated } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
+import ImmersivePlayer from '../components/ImmersivePlayer';
 
 const StoryDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [story, setStory] = useState(null);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hasLiked, setHasLiked] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -18,11 +23,10 @@ const StoryDetails = () => {
         setLoading(true);
         setError(null);
         
-        // Fetch story details
         const storyData = await fetchStory(id);
+        console.log('📄 Story loaded:', storyData.title, 'Type:', storyData.content_type);
         setStory(storyData);
         
-        // Fetch related stories (optional, might fail if endpoint doesn't exist)
         try {
           const relatedData = await fetchRelated(id);
           setRelated(relatedData || []);
@@ -41,6 +45,57 @@ const StoryDetails = () => {
 
     loadStoryData();
   }, [id]);
+
+  const handleLike = async () => {
+    if (!isAuthenticated) {
+      alert('Please login to like stories');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `http://localhost:5000/api/stories/${id}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setStory({ ...story, likes: response.data.likes });
+      setHasLiked(true);
+      
+    } catch (error) {
+      console.error('Failed to like story:', error);
+      alert('Failed to like story');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!isAuthenticated) {
+      alert('Please login to share stories');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `http://localhost:5000/api/stories/${id}/share`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setStory({ ...story, shares: response.data.shares });
+      
+      const url = window.location.href;
+      await navigator.clipboard.writeText(url);
+      alert('Link copied to clipboard!');
+      
+    } catch (error) {
+      console.error('Failed to share story:', error);
+      alert('Failed to share story');
+    }
+  };
 
   if (loading) {
     return (
@@ -88,7 +143,6 @@ const StoryDetails = () => {
   return (
     <div className="section-ksg-padding">
       <div className="container-ksg-max">
-        {/* Breadcrumb Navigation */}
         <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
           <Link to="/" className="hover:text-blue-700 transition-colors">Home</Link>
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,10 +156,8 @@ const StoryDetails = () => {
         </nav>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Story Content */}
           <section className="lg:col-span-2">
             <article className="card-ksg-featured">
-              {/* Story Header */}
               <div className="border-b border-gray-200 pb-6 mb-8">
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-4">
                   {story.title}
@@ -149,64 +201,72 @@ const StoryDetails = () => {
                   )}
                 </div>
 
-                {/* Engagement Stats */}
-                <div className="flex items-center space-x-6 text-sm text-gray-500">
-                  <div className="flex items-center space-x-1">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    <span>{story.views || 0} views</span>
+                <div className="flex items-center justify-between pt-4 border-t flex-wrap gap-4">
+                  <div className="flex items-center space-x-6 text-sm text-gray-500">
+                    <div className="flex items-center space-x-1">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span>{story.views || 0} views</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      <span>{story.likes || 0} likes</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                      </svg>
+                      <span>{story.shares || 0} shares</span>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <span>{story.likes || 0} likes</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                    </svg>
-                    <span>{story.shares || 0} shares</span>
+
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={handleLike}
+                      disabled={hasLiked}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                        hasLiked
+                          ? 'bg-red-100 text-red-600 cursor-not-allowed'
+                          : 'bg-white border-2 border-red-300 text-red-600 hover:bg-red-50'
+                      }`}
+                    >
+                      <svg className={`h-5 w-5 ${hasLiked ? 'fill-current' : ''}`} fill={hasLiked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      <span>{hasLiked ? 'Liked' : 'Like'}</span>
+                    </button>
+
+                    <button
+                      onClick={handleShare}
+                      className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium bg-white border-2 border-[#B5955B] text-[#B5955B] hover:bg-[#B5955B]/5 transition-all"
+                    >
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                      </svg>
+                      <span>Share</span>
+                    </button>
                   </div>
                 </div>
               </div>
 
-              {/* Media Content */}
-              {story.media_url && (
-                <div className="mb-8">
-                  <div className="relative rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                    {story.content_type === 'video' && (
-                      <video 
-                        controls 
-                        src={story.media_url} 
-                        className="w-full"
-                        poster={story.thumbnail_url}
-                      >
-                        Your browser does not support the video tag.
-                      </video>
-                    )}
-                    {story.content_type === 'audio' && (
-                      <div className="p-8">
-                        <audio controls className="w-full" src={story.media_url}>
-                          Your browser does not support the audio tag.
-                        </audio>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Story Description */}
               <div className="prose prose-lg max-w-none mb-8">
                 <div className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">
                   {story.description}
                 </div>
               </div>
 
-              {/* Transcript Section */}
-              {story.transcript && (
+              {/* 🔥 USE IMMERSIVE PLAYER FOR ALL MEDIA */}
+              {story.media_url && (
+                <div className="mb-8">
+                  <ImmersivePlayer story={story} onShare={handleShare} />
+                </div>
+              )}
+
+              {story.transcript && story.content_type === 'document' && (
                 <details className="card-ksg mt-8">
                   <summary className="font-semibold text-gray-900 cursor-pointer flex items-center space-x-2 p-4">
                     <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,7 +282,6 @@ const StoryDetails = () => {
                 </details>
               )}
 
-              {/* Story Tags */}
               {story.tags && story.tags.length > 0 && (
                 <div className="mt-8 pt-6 border-t border-gray-200">
                   <h3 className="text-sm font-semibold text-gray-900 mb-3">Related Topics</h3>
@@ -236,7 +295,6 @@ const StoryDetails = () => {
                 </div>
               )}
 
-              {/* Entities (if available) */}
               {story.entities && (story.entities.people?.length > 0 || story.entities.organizations?.length > 0 || story.entities.locations?.length > 0) && (
                 <div className="mt-8 pt-6 border-t border-gray-200">
                   <h3 className="text-sm font-semibold text-gray-900 mb-3">Mentioned In Story</h3>
@@ -283,9 +341,7 @@ const StoryDetails = () => {
             </article>
           </section>
 
-          {/* Sidebar */}
           <aside className="space-y-6">
-            {/* Author Information */}
             <div className="card-ksg">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
                 <svg className="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,7 +369,6 @@ const StoryDetails = () => {
               </p>
             </div>
 
-            {/* Related Stories */}
             <div className="card-ksg">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
                 <svg className="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -372,7 +427,6 @@ const StoryDetails = () => {
               )}
             </div>
 
-            {/* Call to Action */}
             <div className="card-ksg bg-gradient-to-br from-[#235D4C] to-[#1a4438] text-white">
               <div className="text-center">
                 <svg className="mx-auto h-12 w-12 text-[#B5955B] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
