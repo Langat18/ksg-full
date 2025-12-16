@@ -14,7 +14,7 @@ bp = Blueprint('users', __name__)
 def get_profile():
     """Get current user profile"""
     user_id = get_jwt_identity()
-    user = User.query.get_or_404(user_id)
+    user = User.query.get_or_404(int(user_id))
     
     return jsonify(user.to_dict())
 
@@ -23,7 +23,7 @@ def get_profile():
 def update_profile():
     """Update user profile"""
     user_id = get_jwt_identity()
-    user = User.query.get_or_404(user_id)
+    user = User.query.get_or_404(int(user_id))
     data = request.get_json()
     
     # Update allowed fields
@@ -80,7 +80,7 @@ def login():
     user.last_login = datetime.utcnow()
     db.session.commit()
     
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
     
     return jsonify({
         'access_token': access_token,
@@ -121,14 +121,14 @@ def register():
         full_name=data['full_name'],
         username=data['username'],
         role='user',
-        county=data['county'],  # IMPORTANT: Store county
+        county=data['county'],
         organization=data.get('organization', 'Kenya School of Government')
     )
     
     db.session.add(user)
     db.session.commit()
     
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
     
     return jsonify({
         'message': 'User registered successfully',
@@ -157,12 +157,11 @@ def forgot_password():
     user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
     db.session.commit()
     
-    # In production, send this via email
     print(f"Password reset token for {email}: {reset_token}")
     
     return jsonify({
         'message': 'Password reset instructions sent to your email',
-        'dev_token': reset_token  # Remove this in production!
+        'dev_token': reset_token
     }), 200
 
 @bp.route('/reset-password', methods=['POST'])
