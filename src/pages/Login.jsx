@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
+import API_URL from '../config/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -8,7 +9,7 @@ const Login = () => {
     password: '',
     name: '',
     role: '',
-    county: '' // ADDED - User must select county
+    county: ''
   });
   const [isRegistering, setIsRegistering] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -18,7 +19,6 @@ const Login = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const { login, register, isAuthenticated } = useAuth();
 
-  // Redirect if already authenticated
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -31,7 +31,6 @@ const Login = () => {
     'Other'
   ];
 
-  // KENYAN COUNTIES - Complete list
   const kenyanCounties = [
     'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Garissa',
     'Homa Bay', 'Isiolo', 'Kajiado', 'Kakamega', 'Kericho', 'Kiambu', 'Kilifi',
@@ -59,7 +58,6 @@ const Login = () => {
     
     try {
       if (isRegistering) {
-        // Validation for registration
         if (!formData.county) {
           setError('Please select your county');
           setLoading(false);
@@ -72,7 +70,6 @@ const Login = () => {
           return;
         }
 
-        // Register new user
         const result = await register({
           email: formData.email,
           username: formData.email.split('@')[0],
@@ -80,14 +77,13 @@ const Login = () => {
           full_name: formData.name,
           role: 'user',
           organization: formData.role || 'Kenya School of Government',
-          county: formData.county // IMPORTANT: Send county
+          county: formData.county
         });
 
         if (!result.success) {
           setError(result.error);
         }
       } else {
-        // Login existing user
         const result = await login(formData.email, formData.password);
         
         if (!result.success) {
@@ -109,7 +105,7 @@ const Login = () => {
     setSuccessMessage('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/forgot-password', {
+      const response = await fetch(`${API_URL}/api/users/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail })
@@ -133,7 +129,6 @@ const Login = () => {
     }
   };
 
-  // Forgot Password Form
   if (showForgotPassword) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center section-ksg-padding">
@@ -199,7 +194,6 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center section-ksg-padding">
       <div className="max-w-md w-full mx-auto">
-        {/* KSG-Inspired Header */}
         <div className="text-center mb-8">
           <div className="mx-auto h-20 w-20 bg-gradient-to-br from-[#235D4C] to-[#B5955B] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
             <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,9 +213,7 @@ const Login = () => {
           </p>
         </div>
 
-        {/* KSG-Inspired Login/Register Form */}
         <div className="bg-white rounded-lg shadow-md p-8 border-2 border-[#235D4C]/10 hover:border-[#235D4C]/20 transition-all duration-200">
-          {/* Error Message */}
           {error && (
             <div className="mb-6 bg-red-50 border-2 border-red-400 text-red-700 px-4 py-3 rounded-lg flex items-start">
               <svg className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,7 +224,6 @@ const Login = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name Field - Only for registration */}
             {isRegistering && (
               <div className="form-ksg-group">
                 <label htmlFor="name" className="form-ksg-label">
@@ -251,7 +242,6 @@ const Login = () => {
               </div>
             )}
 
-            {/* Email Field */}
             <div className="form-ksg-group">
               <label htmlFor="email" className="form-ksg-label">
                 Official Email Address *
@@ -274,7 +264,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Password Field */}
             <div className="form-ksg-group">
               <label htmlFor="password" className="form-ksg-label">
                 Password *
@@ -296,7 +285,6 @@ const Login = () => {
               )}
             </div>
 
-            {/* COUNTY FIELD - Only for registration - CRITICAL FIX */}
             {isRegistering && (
               <div className="form-ksg-group">
                 <label htmlFor="county" className="form-ksg-label">
@@ -321,7 +309,6 @@ const Login = () => {
               </div>
             )}
 
-            {/* Role Field - Only for registration */}
             {isRegistering && (
               <div className="form-ksg-group">
                 <label htmlFor="role" className="form-ksg-label">
@@ -345,7 +332,6 @@ const Login = () => {
               </div>
             )}
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -370,7 +356,6 @@ const Login = () => {
               )}
             </button>
 
-            {/* Forgot Password Link - Only show in login mode */}
             {!isRegistering && (
               <div className="text-center">
                 <button
@@ -383,7 +368,6 @@ const Login = () => {
               </div>
             )}
 
-            {/* Toggle between Login/Register */}
             <div className="text-center pt-4 border-t border-gray-200">
               <button
                 type="button"
@@ -399,10 +383,8 @@ const Login = () => {
               </button>
             </div>
           </form>
-
         </div>
 
-        {/* KSG Platform Information */}
         <div className="mt-8 bg-white rounded-lg shadow-sm p-6 border border-[#235D4C]/10">
           <div className="text-center">
             <h3 className="font-semibold text-[#235D4C] mb-4 flex items-center justify-center">
@@ -440,7 +422,6 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Security and Trust Indicators */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600 mb-4">
             By accessing this platform, you agree to contribute meaningful stories that showcase 

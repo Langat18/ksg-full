@@ -1,8 +1,8 @@
 import axios from 'axios';
+import API_URL from '../config/api';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = `${API_URL}/api`;
 
-// Create axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -10,7 +10,6 @@ const apiClient = axios.create({
   },
 });
 
-// Add auth token to requests
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -19,7 +18,6 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Stories
 export const fetchStories = async (params = {}) => {
   const response = await apiClient.get('/stories/', { params });
   return response.data.stories || [];
@@ -62,7 +60,6 @@ export const shareStory = async (id) => {
   return response.data;
 };
 
-// Analytics
 export const fetchAnalytics = async () => {
   const response = await apiClient.get('/analytics/summary');
   return response.data;
@@ -73,7 +70,6 @@ export const fetchUserAnalytics = async (userId) => {
   return response.data;
 };
 
-// Pathways - FIX: Add trailing slash
 export const fetchPathways = async () => {
   const response = await apiClient.get('/pathways/');
   return response.data;
@@ -96,7 +92,6 @@ export const fetchUserPathwayProgress = async () => {
   return response.data;
 };
 
-// Auth
 export const login = async (credentials) => {
   const response = await apiClient.post('/users/login', credentials);
   return response.data;
