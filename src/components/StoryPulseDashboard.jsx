@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_URL from '../config/api';
 
 const StoryPulseDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +17,7 @@ const StoryPulseDashboard = () => {
   const fetchPulseData = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('http://localhost:5000/api/analytics/summary');
+      const response = await axios.get(`${API_URL}/api/analytics/summary`);
       const data = response.data;
       
       setStats({
@@ -81,7 +82,6 @@ const StoryPulseDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header */}
       <div className="text-center bg-[#B5955B] text-white rounded-xl p-8">
         <h1 className="text-4xl font-bold mb-4">KSG Story Pulse</h1>
         <p className="text-xl text-white/90">Real-time insights into Kenya's knowledge network</p>
@@ -93,7 +93,6 @@ const StoryPulseDashboard = () => {
         </div>
       </div>
 
-      {/* Key Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
           <div className="text-3xl font-bold text-[#B5955B] mb-2">
@@ -135,7 +134,6 @@ const StoryPulseDashboard = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Stories by County */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Stories by County</h2>
           {countiesData.length > 0 ? (
@@ -163,7 +161,6 @@ const StoryPulseDashboard = () => {
           )}
         </div>
 
-        {/* Hot Topics */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Hot Topics</h2>
           {hotTopics.length > 0 ? (
@@ -188,7 +185,6 @@ const StoryPulseDashboard = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Top Contributors */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Top Contributors</h2>
           {topContributors.length > 0 ? (
@@ -219,7 +215,6 @@ const StoryPulseDashboard = () => {
           )}
         </div>
 
-        {/* Live Activity Feed */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
           {recentActivity.length > 0 ? (
@@ -241,7 +236,6 @@ const StoryPulseDashboard = () => {
         </div>
       </div>
 
-      {/* Goal Progress */}
       <div className="bg-[#B5955B] rounded-lg text-white p-8">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold mb-2">Platform Goals Progress</h2>

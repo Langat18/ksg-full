@@ -1,149 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 
 const UserDashboard = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [badges, setBadges] = useState([]);
+  const [stats, setStats] = useState({
+    totalPoints: 150,
+    storiesContributed: 3,
+    storiesViewed: 12,
+    pathwaysCompleted: 2,
+    totalViews: 1250,
+    totalShares: 45,
+    level: 'Storyteller',
+    nextLevelPoints: 100
+  });
 
-  useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
+  const [recentActivity, setRecentActivity] = useState([
+    { type: 'contribution', title: 'Shared "Innovation in Machakos"', points: 50, date: '2 days ago' },
+    { type: 'engagement', title: 'Completed "Leadership Journey" pathway', points: 50, date: '1 week ago' },
+    { type: 'social', title: 'Story shared by KSG Official Account', points: 100, date: '2 weeks ago' }
+  ]);
 
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Add token to axios headers
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('No authentication token found');
-        setLoading(false);
-        return;
-      }
+  const badges = [
+    { name: 'First Story', description: 'Shared your first story', earned: true, icon: '📖' },
+    { name: 'County Explorer', description: 'Viewed stories from 5+ counties', earned: true, icon: '🗺️' },
+    { name: 'Knowledge Seeker', description: 'Completed 2+ learning pathways', earned: true, icon: '🎓' },
+    { name: 'Community Builder', description: 'Got 1000+ views on your stories', earned: true, icon: '👥' },
+    { name: 'Policy Expert', description: 'Contributed 5+ policy stories', earned: false, icon: '📋' },
+    { name: 'Video Pioneer', description: 'Uploaded 3+ video stories', earned: false, icon: '🎬' }
+  ];
 
-      // Fetch user profile with stats
-      const profileResponse = await axios.get('http://localhost:5000/api/users/profile', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const userData = profileResponse.data;
-      
-      // Fetch user's stories
-      const storiesResponse = await axios.get(`http://localhost:5000/api/users/${userData.id}/stories`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const userStories = storiesResponse.data.stories || [];
-      
-      // Calculate stats
-      const totalViews = userStories.reduce((sum, story) => sum + (story.views || 0), 0);
-      const totalShares = userStories.reduce((sum, story) => sum + (story.shares || 0), 0);
-      const totalLikes = userStories.reduce((sum, story) => sum + (story.likes || 0), 0);
-      
-      setStats({
-        totalPoints: userData.points || 0,
-        storiesContributed: userStories.length,
-        storiesViewed: 0,
-        pathwaysCompleted: 0,
-        totalViews: totalViews,
-        totalShares: totalShares,
-        totalLikes: totalLikes,
-        level: calculateLevel(userData.points || 0),
-        nextLevelPoints: calculateNextLevelPoints(userData.points || 0)
-      });
-      
-      // Set badges based on achievements
-      setBadges([
-        { 
-          name: 'First Story', 
-          description: 'Shared your first story', 
-          earned: userStories.length >= 1, 
-          icon: '📖' 
-        },
-        { 
-          name: 'Storyteller', 
-          description: 'Shared 3+ stories', 
-          earned: userStories.length >= 3, 
-          icon: '✍️' 
-        },
-        { 
-          name: 'Popular Voice', 
-          description: 'Got 100+ total views', 
-          earned: totalViews >= 100, 
-          icon: '👀' 
-        },
-        { 
-          name: 'Community Builder', 
-          description: 'Got 1000+ views on your stories', 
-          earned: totalViews >= 1000, 
-          icon: '👥' 
-        },
-        { 
-          name: 'Influencer', 
-          description: 'Got 50+ shares', 
-          earned: totalShares >= 50, 
-          icon: '🔄' 
-        },
-        { 
-          name: 'Rising Star', 
-          description: 'Earned 500+ points', 
-          earned: (userData.points || 0) >= 500, 
-          icon: '⭐' 
-        }
-      ]);
-      
-      // Set recent activity
-      setRecentActivity(userStories.slice(0, 5).map(story => ({
-        type: 'contribution',
-        title: `Shared "${story.title}"`,
-        points: 50,
-        date: formatDate(story.created_at)
-      })));
-      
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-      setError('Failed to load dashboard data. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const kenyaCounties = [
+    'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Machakos', 'Meru', 'Nyeri',
+    'Kakamega', 'Kitui', 'Garissa', 'Thika', 'Malindi', 'Kitale', 'Isiolo'
+  ];
 
-  const calculateLevel = (points) => {
-    if (points < 100) return 'Beginner';
-    if (points < 250) return 'Storyteller';
-    if (points < 500) return 'Contributor';
-    if (points < 1000) return 'Expert';
-    return 'Master';
-  };
+  const [impactData, setImpactData] = useState(
+    kenyaCounties.slice(0, 8).map(county => ({
+      county,
+      storiesViewed: Math.floor(Math.random() * 20) + 1,
+      storiesContributed: Math.floor(Math.random() * 3)
+    }))
+  );
 
-  const calculateNextLevelPoints = (points) => {
-    if (points < 100) return 100 - points;
-    if (points < 250) return 250 - points;
-    if (points < 500) return 500 - points;
-    if (points < 1000) return 1000 - points;
-    return 0;
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'recently';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'today';
-    if (diffDays === 1) return 'yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    return `${Math.floor(diffDays / 30)} months ago`;
-  };
+  const levelProgress = (stats.totalPoints % 200) / 200 * 100;
 
   const getActivityIcon = (type) => {
     switch (type) {
@@ -155,51 +55,19 @@ const UserDashboard = () => {
   };
 
   const getPointsColor = (points) => {
-    if (points >= 100) return 'text-[#B5955B]';
-    if (points >= 50) return 'text-[#235D4C]';
-    return 'text-[#235D4C]/80';
+    if (points >= 100) return 'text-purple-600';
+    if (points >= 50) return 'text-blue-600';
+    return 'text-green-600';
   };
-
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#235D4C]"></div>
-          <span className="ml-3 text-gray-600">Loading your dashboard...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !stats) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="text-center py-12">
-          <svg className="mx-auto h-16 w-16 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-gray-600 mb-4">{error || 'Failed to load dashboard data.'}</p>
-          <button
-            onClick={fetchDashboardData}
-            className="bg-[#B5955B] hover:bg-[#B5955B]/90 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const levelProgress = ((stats.totalPoints % 250) / 250) * 100;
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="bg-[#235D4C] rounded-xl text-white p-8">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl text-white p-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.full_name || user?.username}!</h1>
-            <p className="text-white/80 text-lg">Level: {stats.level}</p>
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
+            <p className="text-blue-100 text-lg">Level: {stats.level}</p>
           </div>
           <div className="mt-4 md:mt-0 text-center">
             <div className="text-4xl font-bold">{stats.totalPoints}</div>
@@ -209,13 +77,13 @@ const UserDashboard = () => {
         
         {/* Level Progress */}
         <div className="mt-6">
-          <div className="flex justify-between text-sm text-white/70 mb-2">
+          <div className="flex justify-between text-sm text-blue-200 mb-2">
             <span>Progress to next level</span>
             <span>{stats.nextLevelPoints} points to go</span>
           </div>
-          <div className="w-full bg-[#235D4C]/20 rounded-full h-3">
+          <div className="w-full bg-blue-800 rounded-full h-3">
             <div 
-              className="bg-[#B5955B] h-3 rounded-full transition-all duration-500"
+              className="bg-yellow-400 h-3 rounded-full transition-all duration-500"
               style={{ width: `${levelProgress}%` }}
             ></div>
           </div>
@@ -225,20 +93,20 @@ const UserDashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-[#235D4C] mb-1">{stats.storiesContributed}</div>
+          <div className="text-3xl font-bold text-blue-600 mb-1">{stats.storiesContributed}</div>
           <div className="text-gray-600 text-sm">Stories Shared</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-[#235D4C] mb-1">{stats.totalViews}</div>
+          <div className="text-3xl font-bold text-green-600 mb-1">{stats.storiesViewed}</div>
+          <div className="text-gray-600 text-sm">Stories Viewed</div>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
+          <div className="text-3xl font-bold text-purple-600 mb-1">{stats.totalViews}</div>
           <div className="text-gray-600 text-sm">Total Views</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-purple-600 mb-1">{stats.totalShares}</div>
-          <div className="text-gray-600 text-sm">Total Shares</div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-amber-600 mb-1">{stats.totalLikes}</div>
-          <div className="text-gray-600 text-sm">Total Likes</div>
+          <div className="text-3xl font-bold text-amber-600 mb-1">{stats.pathwaysCompleted}</div>
+          <div className="text-gray-600 text-sm">Pathways Done</div>
         </div>
       </div>
 
@@ -252,12 +120,12 @@ const UserDashboard = () => {
                 key={index}
                 className={`p-4 rounded-lg border-2 text-center transition-all ${
                   badge.earned 
-                    ? 'border-[#B5955B] bg-[#B5955B]/5' 
+                    ? 'border-blue-200 bg-blue-50' 
                     : 'border-gray-200 bg-gray-50 opacity-60'
                 }`}
               >
                 <div className="text-2xl mb-2">{badge.icon}</div>
-                <div className={`font-medium text-sm ${badge.earned ? 'text-[#235D4C]' : 'text-gray-600'}`}>
+                <div className={`font-medium text-sm ${badge.earned ? 'text-blue-900' : 'text-gray-600'}`}>
                   {badge.name}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
@@ -271,31 +139,24 @@ const UserDashboard = () => {
         {/* Recent Activity */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
-          {recentActivity.length > 0 ? (
-            <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg">
-                  <div className="text-xl">{getActivityIcon(activity.type)}</div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                    <p className="text-xs text-gray-500">{activity.date}</p>
-                  </div>
-                  <div className={`text-sm font-bold ${getPointsColor(activity.points)}`}>
-                    +{activity.points}
-                  </div>
+          <div className="space-y-4">
+            {recentActivity.map((activity, index) => (
+              <div key={index} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg">
+                <div className="text-xl">{getActivityIcon(activity.type)}</div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                  <p className="text-xs text-gray-500">{activity.date}</p>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>No recent activity</p>
-              <p className="text-sm mt-2">Start sharing stories to see your activity here!</p>
-            </div>
-          )}
+                <div className={`text-sm font-bold ${getPointsColor(activity.points)}`}>
+                  +{activity.points}
+                </div>
+              </div>
+            ))}
+          </div>
           <div className="mt-4 pt-4 border-t">
             <Link 
               to="/submit" 
-              className="w-full bg-[#B5955B] hover:bg-[#B5955B]/90 text-white py-2 px-4 rounded-lg font-medium transition-colors text-center block shadow-sm"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors text-center block"
             >
               Share Another Story (+50 points)
             </Link>
@@ -303,8 +164,38 @@ const UserDashboard = () => {
         </div>
       </div>
 
+      {/* Knowledge Impact Map */}
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Your Knowledge Impact Across Kenya</h2>
+        <p className="text-gray-600 mb-6">Counties where your stories have made an impact</p>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {impactData.map((county, index) => (
+            <div key={index} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+              <div className="font-medium text-gray-900 mb-2">{county.county}</div>
+              <div className="text-sm text-gray-600">
+                <div>📖 {county.storiesViewed} viewed</div>
+                {county.storiesContributed > 0 && (
+                  <div>✍️ {county.storiesContributed} contributed</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">{impactData.length}</div>
+            <div className="text-sm text-blue-800">Counties Reached</div>
+            <p className="text-xs text-blue-700 mt-2">
+              Your stories are connecting communities across Kenya!
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Quick Actions */}
-      <div className="bg-[#B5955B] rounded-lg text-white p-6">
+      <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg text-white p-6">
         <h2 className="text-xl font-bold mb-4">Ready for More Impact?</h2>
         <div className="grid md:grid-cols-3 gap-4">
           <Link 

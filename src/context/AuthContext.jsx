@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import API_URL from '../config/api';
 
 const AuthContext = createContext();
 
@@ -28,15 +29,13 @@ export function AuthProvider({ children }) {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/users/profile');
+      const response = await axios.get(`${API_URL}/api/users/profile`);
       const userData = response.data;
-
       const enrichedUser = {
         ...userData,
         isAdmin: userData.email?.endsWith('@ksg.ac.ke') || userData.role === 'admin',
         loginTime: new Date().toISOString()
       };
-
       setUser(enrichedUser);
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
@@ -48,24 +47,20 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/users/login', {
+      const response = await axios.post(`${API_URL}/api/users/login`, {
         email,
         password
       });
-
       const { access_token, user: userData } = response.data;
-
       const enrichedUser = {
         ...userData,
         isAdmin: userData.email?.endsWith('@ksg.ac.ke') || userData.role === 'admin',
         loginTime: new Date().toISOString()
       };
-
       setToken(access_token);
       setUser(enrichedUser);
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-
       return { success: true, user: enrichedUser };
     } catch (error) {
       return {
@@ -77,21 +72,17 @@ export function AuthProvider({ children }) {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/users/register', userData);
-
+      const response = await axios.post(`${API_URL}/api/users/register`, userData);
       const { access_token, user: newUser } = response.data;
-
       const enrichedUser = {
         ...newUser,
         isAdmin: newUser.email?.endsWith('@ksg.ac.ke') || newUser.role === 'admin',
         loginTime: new Date().toISOString()
       };
-
       setToken(access_token);
       setUser(enrichedUser);
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-
       return { success: true, user: enrichedUser };
     } catch (error) {
       return {
