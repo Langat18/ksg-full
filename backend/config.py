@@ -2,10 +2,8 @@ import os
 from datetime import timedelta
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Get the absolute path to the backend directory
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
@@ -13,25 +11,20 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # JWT Configuration
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     
-    # File Upload Configuration - FIXED: Use absolute path
-    UPLOAD_FOLDER = os.path.join(basedir, 'uploads')  # Now: /full/path/to/backend/uploads
-    MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB limit
+    UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
+    MAX_CONTENT_LENGTH = 50 * 1024 * 1024
     ALLOWED_EXTENSIONS = {'mp4', 'mp3', 'wav', 'm4a', 'pdf', 'docx', 'jpg', 'jpeg', 'png'}
     
-    # Neo4j Configuration
-    NEO4J_URI = os.getenv('NEO4J_URI')
-    NEO4J_USER = os.getenv('NEO4J_USER')
-    NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD')
+    NEO4J_URI = os.getenv('NEO4J_URI', 'bolt://localhost:7687')
+    NEO4J_USER = os.getenv('NEO4J_USER', 'neo4j')
+    NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD', 'password')
     
-    # Redis Configuration
-    REDIS_URL = os.getenv('REDIS_URL')
+    REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
     
-    # CORS Configuration
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5173').split(',')
 
 class DevelopmentConfig(Config):
@@ -39,10 +32,15 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB in production
+    MAX_CONTENT_LENGTH = 100 * 1024 * 1024
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
+    'testing': TestingConfig,
     'default': DevelopmentConfig
 }
