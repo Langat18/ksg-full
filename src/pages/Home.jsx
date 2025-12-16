@@ -111,8 +111,41 @@ const Home = () => {
         <img 
           src="/assets/homepage.png" 
           alt="KSG Homepage" 
-          className="w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover"
         />
+        <div className="absolute inset-0">
+          <div className="container-ksg-max h-full flex items-center">
+            <div className="max-w-5xl mx-auto text-center animate-ksg-fade-in-up">
+              <div className="mb-6">
+                <div className="inline-flex items-center px-4 py-2 bg-black/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6 text-[#B5955B]">
+                  <div className="h-2 w-2 bg-[#B5955B] rounded-full mr-2 animate-pulse"></div>
+                  Kenya School of Government Digital Platform
+                </div>
+              </div>
+              <h1 className="text-4xl md:text-6xl font-bold text-black mb-6 leading-tight">
+                Transforming Kenya Through<br />
+                <span className="text-[#B5955B]">Shared Stories</span>
+              </h1>
+              <p className="text-xl md:text-2xl text-black/80 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Discover authentic narratives of leadership, innovation, and impact from across Kenya's 47 counties
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link 
+                  to="/search" 
+                  className="btn-ksg-primary text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
+                >
+                  Explore Stories
+                </Link>
+                <Link 
+                  to="/submit" 
+                  className="btn-ksg-secondary text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
+                >
+                  Share Your Impact
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Statistics Section - NOW WITH REAL DATA */}
