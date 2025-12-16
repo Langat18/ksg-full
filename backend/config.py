@@ -25,7 +25,7 @@ class Config:
     
     REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
     
-    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5173').split(',')
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5173,https://ksg-fullwebapplication.onrender.com').split(',')
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -33,6 +33,7 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     MAX_CONTENT_LENGTH = 100 * 1024 * 1024
+    CORS_ORIGINS = ['https://ksg-fullwebapplication.onrender.com', 'http://localhost:5173']
 
 class TestingConfig(Config):
     TESTING = True
