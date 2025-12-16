@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchStories } from '../services/api';
 import StoryCard from '../components/StoryCard';
+import API_URL from '../config/api';
 
 const Home = () => {
   const [stories, setStories] = useState([]);
@@ -33,9 +34,8 @@ const Home = () => {
           setFeaturedStory(storiesArray[0]);
         }
 
-        // Fetch analytics for real stats
         try {
-          const analyticsResponse = await fetch('http://localhost:5000/api/analytics/summary');
+          const analyticsResponse = await fetch(`${API_URL}/api/analytics/summary`);
           if (analyticsResponse.ok) {
             const analytics = await analyticsResponse.json();
             
@@ -63,7 +63,6 @@ const Home = () => {
           }
         } catch (analyticsError) {
           console.log('Using fallback stats from stories');
-          // Fallback to story-based counts
           setStats({
             storiesShared: storiesArray.length,
             countiesCovered: new Set(storiesArray.map(s => s.county).filter(Boolean)).size,
@@ -142,7 +141,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Statistics Section - NOW WITH REAL DATA */}
       <section className="section-ksg-padding bg-white">
         <div className="container-ksg-max">
           <div className="text-center mb-12">
@@ -184,9 +182,27 @@ const Home = () => {
               <Link to={`/story/${featuredStory.id}`}>
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="relative h-64 md:h-full rounded-lg overflow-hidden">
-                    {featuredStory.thumbnail_url || featuredStory.media_url ? (
+                    {featuredStory.content_type === 'video' ? (
+                      <div className="w-full h-full bg-gradient-to-br from-[#235D4C] to-[#B5955B] flex items-center justify-center">
+                        <svg className="h-24 w-24 text-white/80" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    ) : featuredStory.content_type === 'audio' ? (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-600 to-[#B5955B] flex items-center justify-center">
+                        <svg className="h-24 w-24 text-white/80" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+                        </svg>
+                      </div>
+                    ) : featuredStory.content_type === 'document' || featuredStory.content_type === 'pdf' ? (
+                      <div className="w-full h-full bg-gradient-to-br from-red-600 to-[#B5955B] flex items-center justify-center">
+                        <svg className="h-24 w-24 text-white/80" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    ) : featuredStory.thumbnail_url || featuredStory.media_url ? (
                       <img 
-                        src={`http://localhost:5000${featuredStory.thumbnail_url || featuredStory.media_url}`}
+                        src={`${API_URL}${featuredStory.thumbnail_url || featuredStory.media_url}`}
                         alt={featuredStory.title}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -254,7 +270,6 @@ const Home = () => {
         </section>
       )}
 
-      {/* Categories Section - NOW WITH REAL COUNTS */}
       <section className="section-ksg-padding bg-gray-50">
         <div className="container-ksg-max">
           <div className="text-center mb-12">
