@@ -11,3 +11,5 @@ neo4j==5.14.0
 redis==5.0.1
 gunicorn==21.2.0
 spacy>=3.7.0
+py2neo>=2021.2.3
+Werkzeug==3.0.1
