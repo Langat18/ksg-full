@@ -25,9 +25,9 @@ const SubmitStory = () => {
       const payload = new FormData();
       payload.append('title', formData.title);
       payload.append('description', formData.description);
-      payload.append('content_type', formData.contentType || 'video'); // Map to backend field
+      payload.append('content_type', formData.contentType || 'video'); 
       payload.append('category', formData.category);
-      payload.append('county', formData.county || 'Nairobi');
+      payload.append('county', formData.county);
       payload.append('transcript', formData.transcript || '');
       payload.append('duration', formData.duration || 0);
       
