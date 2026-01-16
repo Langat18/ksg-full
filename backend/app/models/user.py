@@ -10,28 +10,24 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     full_name = db.Column(db.String(120))
-    role = db.Column(db.String(20), default='user')  # user, admin, contributor
+    role = db.Column(db.String(20), default='user')
     
-    # Profile information
     organization = db.Column(db.String(120))
-    county = db.Column(db.String(50))  # NO DEFAULT - user must select
+    county = db.Column(db.String(50))
+    campus = db.Column(db.String(50))
     bio = db.Column(db.Text)
     profile_image = db.Column(db.String(255))
     
-    # Password reset
     reset_token = db.Column(db.String(100))
     reset_token_expiry = db.Column(db.DateTime)
     
-    # Gamification
     points = db.Column(db.Integer, default=0)
     level = db.Column(db.Integer, default=1)
     
-    # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_login = db.Column(db.DateTime)
     
-    # Relationships
     stories = db.relationship('Story', back_populates='author', lazy='dynamic')
     contributions = db.relationship('Contribution', back_populates='user', lazy='dynamic')
     badges = db.relationship('UserBadge', back_populates='user', lazy='dynamic')
@@ -52,6 +48,7 @@ class User(db.Model):
             'role': self.role,
             'organization': self.organization,
             'county': self.county,
+            'campus': self.campus,
             'bio': self.bio,
             'profile_image': self.profile_image,
             'points': self.points,

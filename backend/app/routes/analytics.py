@@ -11,28 +11,21 @@ bp = Blueprint('analytics', __name__)
 
 @bp.route('/summary', methods=['GET'])
 def get_analytics_summary():
-    """Get overall platform analytics"""
-    
-    # Total stories
     total_stories = Story.query.filter_by(status='published').count()
     
-    # Total engagement metrics
     stories = Story.query.filter_by(status='published').all()
     total_views = sum(story.views for story in stories)
     total_shares = sum(story.shares for story in stories)
     total_likes = sum(story.likes for story in stories)
     
-    # Active users (users who logged in last 30 days)
     thirty_days_ago = datetime.utcnow() - timedelta(days=30)
     active_users = User.query.filter(User.last_login >= thirty_days_ago).count()
     
-    # Counties covered
     counties_covered = db.session.query(func.count(func.distinct(Story.county))).filter(
         Story.status == 'published',
         Story.county.isnot(None)
     ).scalar()
     
-    # Top category
     top_category = db.session.query(
         Story.category,
         func.count(Story.id).label('count')
@@ -41,7 +34,6 @@ def get_analytics_summary():
         Story.category.isnot(None)
     ).group_by(Story.category).order_by(desc('count')).first()
     
-    # Stories by county (top 10)
     counties_data = db.session.query(
         Story.county,
         func.count(Story.id).label('stories'),
@@ -51,7 +43,6 @@ def get_analytics_summary():
         Story.county.isnot(None)
     ).group_by(Story.county).order_by(desc('stories')).limit(10).all()
     
-    # Hot topics (top categories)
     hot_topics = db.session.query(
         Story.category,
         func.count(Story.id).label('count')
@@ -60,7 +51,6 @@ def get_analytics_summary():
         Story.category.isnot(None)
     ).group_by(Story.category).order_by(desc('count')).limit(6).all()
     
-    # Top contributors
     top_contributors = db.session.query(
         User.id,
         User.full_name,
@@ -70,7 +60,17 @@ def get_analytics_summary():
         Story.status == 'published'
     ).group_by(User.id).order_by(desc('story_count')).limit(5).all()
     
-    # Recent activity (last 10 stories)
+    campus_stats = db.session.query(
+        User.campus,
+        func.count(User.id)
+    ).filter(
+        User.campus.isnot(None)
+    ).group_by(User.campus).all()
+    
+    campus_distribution = {
+        campus: count for campus, count in campus_stats
+    }
+    
     recent_stories = Story.query.filter_by(status='published').order_by(
         Story.created_at.desc()
     ).limit(10).all()
@@ -78,12 +78,14 @@ def get_analytics_summary():
     return jsonify({
         'total_stories': total_stories,
         'total_views': total_views,
-        'total_plays': total_views,  # Same as views
+        'total_plays': total_views,
         'total_shares': total_shares,
         'total_likes': total_likes,
         'active_users': active_users if active_users else 0,
         'counties_covered': counties_covered if counties_covered else 0,
         'top_category': top_category[0] if top_category else 'N/A',
+        'campus_distribution': campus_distribution,
+        'total_campuses': len(campus_distribution),
         'counties_data': [
             {
                 'county': county,
@@ -96,7 +98,7 @@ def get_analytics_summary():
             {
                 'topic': category,
                 'count': count,
-                'trend': 'up'  # You can enhance this with time-based analysis
+                'trend': 'up'
             }
             for category, count in hot_topics
         ],
@@ -124,25 +126,20 @@ def get_analytics_summary():
 @bp.route('/user/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_user_analytics(user_id):
-    """Get analytics for a specific user"""
     current_user_id = get_jwt_identity()
     
-    # Only allow users to see their own analytics or admins
     user = User.query.get_or_404(user_id)
     current_user = User.query.get(current_user_id)
     
     if current_user_id != user_id and current_user.role != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
     
-    # User's stories
     user_stories = Story.query.filter_by(author_id=user_id, status='published').all()
     
-    # Calculate engagement
     total_views = sum(story.views for story in user_stories)
     total_shares = sum(story.shares for story in user_stories)
     total_likes = sum(story.likes for story in user_stories)
     
-    # Most popular story
     most_popular = max(user_stories, key=lambda s: s.views) if user_stories else None
     
     return jsonify({
@@ -158,8 +155,6 @@ def get_user_analytics(user_id):
 
 @bp.route('/trending', methods=['GET'])
 def get_trending_analytics():
-    """Get trending stories and topics"""
-    # Stories trending this week
     week_ago = datetime.utcnow() - timedelta(days=7)
     
     trending_stories = Story.query.filter(
@@ -172,7 +167,6 @@ def get_trending_analytics():
     })
 
 def format_time_ago(dt):
-    """Format datetime as time ago string"""
     if not dt:
         return 'recently'
     

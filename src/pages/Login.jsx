@@ -9,7 +9,8 @@ const Login = () => {
     password: '',
     name: '',
     role: '',
-    county: ''
+    county: '',
+    campus: ''
   });
   const [isRegistering, setIsRegistering] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -41,6 +42,14 @@ const Login = () => {
     'Turkana', 'Uasin Gishu', 'Vihiga', 'Wajir', 'West Pokot'
   ];
 
+  const campuses = [
+    'Main Campus (Kabete)',
+    'Mombasa Campus',
+    'Embu Campus',
+    'Matuga Campus',
+    'Baringo Campus'
+  ];
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -58,6 +67,12 @@ const Login = () => {
     
     try {
       if (isRegistering) {
+        if (!formData.campus) {
+          setError('Please select your campus');
+          setLoading(false);
+          return;
+        }
+
         if (!formData.county) {
           setError('Please select your county');
           setLoading(false);
@@ -77,7 +92,8 @@ const Login = () => {
           full_name: formData.name,
           role: 'user',
           organization: formData.role || 'Kenya School of Government',
-          county: formData.county
+          county: formData.county,
+          campus: formData.campus
         });
 
         if (!result.success) {
@@ -286,50 +302,72 @@ const Login = () => {
             </div>
 
             {isRegistering && (
-              <div className="form-ksg-group">
-                <label htmlFor="county" className="form-ksg-label">
-                  Your County *
-                </label>
-                <select
-                  id="county"
-                  name="county"
-                  required
-                  value={formData.county}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
-                >
-                  <option value="">Select your county</option>
-                  {kenyanCounties.map(county => (
-                    <option key={county} value={county}>{county}</option>
-                  ))}
-                </select>
-                <div className="mt-2 text-sm text-[#235D4C]/70">
-                  This helps us connect you with stories from your region
+              <>
+                <div className="form-ksg-group">
+                  <label htmlFor="campus" className="form-ksg-label">
+                    Your Campus *
+                  </label>
+                  <select
+                    id="campus"
+                    name="campus"
+                    required
+                    value={formData.campus}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
+                  >
+                    <option value="">Select your campus</option>
+                    {campuses.map(campus => (
+                      <option key={campus} value={campus}>{campus}</option>
+                    ))}
+                  </select>
+                  <div className="mt-2 text-sm text-[#235D4C]/70">
+                    This helps us show campus-specific content
+                  </div>
                 </div>
-              </div>
-            )}
 
-            {isRegistering && (
-              <div className="form-ksg-group">
-                <label htmlFor="role" className="form-ksg-label">
-                  Your Role at KSG
-                </label>
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
-                >
-                  <option value="">Select your role (optional)</option>
-                  {roles.map(role => (
-                    <option key={role} value={role}>{role}</option>
-                  ))}
-                </select>
-                <div className="mt-2 text-sm text-[#235D4C]/70">
-                  This helps us customize your platform experience
+                <div className="form-ksg-group">
+                  <label htmlFor="county" className="form-ksg-label">
+                    Your County *
+                  </label>
+                  <select
+                    id="county"
+                    name="county"
+                    required
+                    value={formData.county}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
+                  >
+                    <option value="">Select your county</option>
+                    {kenyanCounties.map(county => (
+                      <option key={county} value={county}>{county}</option>
+                    ))}
+                  </select>
+                  <div className="mt-2 text-sm text-[#235D4C]/70">
+                    This helps us connect you with stories from your region
+                  </div>
                 </div>
-              </div>
+
+                <div className="form-ksg-group">
+                  <label htmlFor="role" className="form-ksg-label">
+                    Your Role at KSG
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/30 bg-white text-gray-800 focus:border-[#B5955B] focus:ring-1 focus:ring-[#B5955B]/20 focus:outline-none transition-all duration-200 hover:border-[#235D4C]/50"
+                  >
+                    <option value="">Select your role (optional)</option>
+                    {roles.map(role => (
+                      <option key={role} value={role}>{role}</option>
+                    ))}
+                  </select>
+                  <div className="mt-2 text-sm text-[#235D4C]/70">
+                    This helps us customize your platform experience
+                  </div>
+                </div>
+              </>
             )}
 
             <button
@@ -404,7 +442,7 @@ const Login = () => {
                 <svg className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span>Connect across 47 counties</span>
+                <span>Connect across 5 campuses</span>
               </div>
               <div className="flex items-start space-x-2">
                 <svg className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
