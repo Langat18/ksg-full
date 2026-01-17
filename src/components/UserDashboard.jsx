@@ -1,73 +1,102 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import API_URL from '../config/api';
 
 const UserDashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState({
-    totalPoints: 150,
-    storiesContributed: 3,
-    storiesViewed: 12,
-    pathwaysCompleted: 2,
-    totalViews: 1250,
-    totalShares: 45,
-    level: 'Storyteller',
+    totalPoints: 0,
+    storiesContributed: 0,
+    storiesViewed: 0,
+    pathwaysCompleted: 0,
+    totalViews: 0,
+    totalShares: 0,
+    level: 1,
     nextLevelPoints: 100
   });
+  const [loading, setLoading] = useState(true);
 
-  const [recentActivity, setRecentActivity] = useState([
-    { type: 'contribution', title: 'Shared "Innovation in Machakos"', points: 50, date: '2 days ago' },
-    { type: 'engagement', title: 'Completed "Leadership Journey" pathway', points: 50, date: '1 week ago' },
-    { type: 'social', title: 'Story shared by KSG Official Account', points: 100, date: '2 weeks ago' }
-  ]);
+  useEffect(() => {
+    if (user) {
+      fetchUserStats();
+    }
+  }, [user]);
 
-  const badges = [
-    { name: 'First Story', description: 'Shared your first story', earned: true, icon: '📖' },
-    { name: 'County Explorer', description: 'Viewed stories from 5+ counties', earned: true, icon: '🗺️' },
-    { name: 'Knowledge Seeker', description: 'Completed 2+ learning pathways', earned: true, icon: '🎓' },
-    { name: 'Community Builder', description: 'Got 1000+ views on your stories', earned: true, icon: '👥' },
-    { name: 'Policy Expert', description: 'Contributed 5+ policy stories', earned: false, icon: '📋' },
-    { name: 'Video Pioneer', description: 'Uploaded 3+ video stories', earned: false, icon: '🎬' }
-  ];
-
-  const kenyaCounties = [
-    'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Machakos', 'Meru', 'Nyeri',
-    'Kakamega', 'Kitui', 'Garissa', 'Thika', 'Malindi', 'Kitale', 'Isiolo'
-  ];
-
-  const [impactData, setImpactData] = useState(
-    kenyaCounties.slice(0, 8).map(county => ({
-      county,
-      storiesViewed: Math.floor(Math.random() * 20) + 1,
-      storiesContributed: Math.floor(Math.random() * 3)
-    }))
-  );
-
-  const levelProgress = (stats.totalPoints % 200) / 200 * 100;
-
-  const getActivityIcon = (type) => {
-    switch (type) {
-      case 'contribution': return '📝';
-      case 'engagement': return '🎯';
-      case 'social': return '🔄';
-      default: return '⭐';
+  const fetchUserStats = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/api/analytics/user/${user.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = response.data;
+      
+      setStats({
+        totalPoints: user.points || 0,
+        storiesContributed: data.stories_count || 0,
+        storiesViewed: 0,
+        pathwaysCompleted: 0,
+        totalViews: data.total_views || 0,
+        totalShares: data.total_shares || 0,
+        level: user.level || 1,
+        nextLevelPoints: 100
+      });
+    } catch (error) {
+      console.error('Failed to fetch user stats:', error);
+      setStats({
+        totalPoints: user?.points || 0,
+        storiesContributed: 0,
+        storiesViewed: 0,
+        pathwaysCompleted: 0,
+        totalViews: 0,
+        totalShares: 0,
+        level: user?.level || 1,
+        nextLevelPoints: 100
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getPointsColor = (points) => {
-    if (points >= 100) return 'text-purple-600';
-    if (points >= 50) return 'text-blue-600';
-    return 'text-green-600';
-  };
+  const badges = [
+    { name: 'First Story', description: 'Shared your first story', earned: stats.storiesContributed >= 1, icon: '📖' },
+    { name: 'County Explorer', description: 'Viewed stories from 5+ counties', earned: false, icon: '🗺️' },
+    { name: 'Knowledge Seeker', description: 'Completed 2+ learning pathways', earned: stats.pathwaysCompleted >= 2, icon: '🎓' },
+    { name: 'Community Builder', description: 'Got 1000+ views on your stories', earned: stats.totalViews >= 1000, icon: '👥' },
+    { name: 'Policy Expert', description: 'Contributed 5+ policy stories', earned: stats.storiesContributed >= 5, icon: '📋' },
+    { name: 'Video Pioneer', description: 'Uploaded 3+ video stories', earned: false, icon: '🎬' }
+  ];
+
+  const levelProgress = stats.totalPoints > 0 ? ((stats.totalPoints % 200) / 200) * 100 : 0;
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#235D4C] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl text-white p-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.full_name || user?.username}!</h1>
             <p className="text-blue-100 text-lg">Level: {stats.level}</p>
+            {user?.campus && (
+              <p className="text-blue-200 text-sm mt-1">📍 {user.campus}</p>
+            )}
+            {user?.county && (
+              <p className="text-blue-200 text-sm">🗺️ {user.county} County</p>
+            )}
           </div>
           <div className="mt-4 md:mt-0 text-center">
             <div className="text-4xl font-bold">{stats.totalPoints}</div>
@@ -75,7 +104,6 @@ const UserDashboard = () => {
           </div>
         </div>
         
-        {/* Level Progress */}
         <div className="mt-6">
           <div className="flex justify-between text-sm text-blue-200 mb-2">
             <span>Progress to next level</span>
@@ -90,7 +118,6 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
           <div className="text-3xl font-bold text-blue-600 mb-1">{stats.storiesContributed}</div>
@@ -111,7 +138,6 @@ const UserDashboard = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Badges Section */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Your Badges</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -136,91 +162,77 @@ const UserDashboard = () => {
           </div>
         </div>
 
-        {/* Recent Activity */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
-          <div className="space-y-4">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg">
-                <div className="text-xl">{getActivityIcon(activity.type)}</div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                  <p className="text-xs text-gray-500">{activity.date}</p>
-                </div>
-                <div className={`text-sm font-bold ${getPointsColor(activity.points)}`}>
-                  +{activity.points}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 pt-4 border-t">
-            <Link 
-              to="/submit" 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors text-center block"
-            >
-              Share Another Story (+50 points)
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Knowledge Impact Map */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Your Knowledge Impact Across Kenya</h2>
-        <p className="text-gray-600 mb-6">Counties where your stories have made an impact</p>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {impactData.map((county, index) => (
-            <div key={index} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
-              <div className="font-medium text-gray-900 mb-2">{county.county}</div>
-              <div className="text-sm text-gray-600">
-                <div>📖 {county.storiesViewed} viewed</div>
-                {county.storiesContributed > 0 && (
-                  <div>✍️ {county.storiesContributed} contributed</div>
-                )}
-              </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Get Started</h2>
+          {stats.storiesContributed === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Share Your First Story!</h3>
+              <p className="text-gray-600 mb-4">
+                Start your journey by sharing a transformational story from your experience.
+              </p>
+              <Link 
+                to="/submit" 
+                className="inline-block bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+              >
+                Create Story (+50 points)
+              </Link>
             </div>
-          ))}
-        </div>
-        
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{impactData.length}</div>
-            <div className="text-sm text-blue-800">Counties Reached</div>
-            <p className="text-xs text-blue-700 mt-2">
-              Your stories are connecting communities across Kenya!
-            </p>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">🎉</div>
+                  <div>
+                    <p className="font-medium text-green-900">Great start!</p>
+                    <p className="text-sm text-green-700">You&apos;ve shared {stats.storiesContributed} {stats.storiesContributed === 1 ? 'story' : 'stories'}</p>
+                  </div>
+                </div>
+              </div>
+              <Link 
+                to="/submit" 
+                className="block w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors text-center"
+              >
+                Share Another Story (+50 points)
+              </Link>
+              <Link 
+                to="/pathways" 
+                className="block w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg font-medium transition-colors text-center"
+              >
+                Explore Learning Pathways
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Quick Actions */}
       <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg text-white p-6">
-        <h2 className="text-xl font-bold mb-4">Ready for More Impact?</h2>
+        <h2 className="text-xl font-bold mb-4">Discover Stories from Across Kenya</h2>
+        <p className="mb-4">Explore transformational stories from all 47 counties and 5 KSG campuses</p>
         <div className="grid md:grid-cols-3 gap-4">
-          <Link 
-            to="/submit" 
-            className="bg-white/20 hover:bg-white/30 p-4 rounded-lg transition-colors text-center"
-          >
-            <div className="text-2xl mb-2">📝</div>
-            <div className="font-medium">Share New Story</div>
-            <div className="text-sm opacity-90">+50 points</div>
-          </Link>
-          <Link 
-            to="/pathways" 
-            className="bg-white/20 hover:bg-white/30 p-4 rounded-lg transition-colors text-center"
-          >
-            <div className="text-2xl mb-2">🎓</div>
-            <div className="font-medium">Complete Pathway</div>
-            <div className="text-sm opacity-90">+50 points</div>
-          </Link>
           <Link 
             to="/search" 
             className="bg-white/20 hover:bg-white/30 p-4 rounded-lg transition-colors text-center"
           >
             <div className="text-2xl mb-2">🔍</div>
             <div className="font-medium">Discover Stories</div>
-            <div className="text-sm opacity-90">+10 points each</div>
+            <div className="text-sm opacity-90">Browse platform stories</div>
+          </Link>
+          <Link 
+            to="/pathways" 
+            className="bg-white/20 hover:bg-white/30 p-4 rounded-lg transition-colors text-center"
+          >
+            <div className="text-2xl mb-2">🎓</div>
+            <div className="font-medium">Learning Pathways</div>
+            <div className="text-sm opacity-90">Structured learning</div>
+          </Link>
+          <Link 
+            to="/pulse" 
+            className="bg-white/20 hover:bg-white/30 p-4 rounded-lg transition-colors text-center"
+          >
+            <div className="text-2xl mb-2">📊</div>
+            <div className="font-medium">Platform Pulse</div>
+            <div className="text-sm opacity-90">See platform stats</div>
           </Link>
         </div>
       </div>

@@ -58,18 +58,23 @@ def get_analytics_summary():
         func.count(Story.id).label('story_count')
     ).join(Story, User.id == Story.author_id).filter(
         Story.status == 'published'
-    ).group_by(User.id).order_by(desc('story_count')).limit(5).all()
+    ).group_by(User.id, User.full_name, User.username).order_by(desc('story_count')).limit(5).all()
     
     campus_stats = db.session.query(
         User.campus,
-        func.count(User.id)
+        func.count(User.id).label('user_count')
     ).filter(
-        User.campus.isnot(None)
+        User.campus.isnot(None),
+        User.campus != ''
     ).group_by(User.campus).all()
     
-    campus_distribution = {
-        campus: count for campus, count in campus_stats
-    }
+    campus_distribution = {}
+    for campus, count in campus_stats:
+        if campus:
+            campus_distribution[campus] = count
+    
+    print(f"DEBUG: Campus stats query result: {campus_stats}")
+    print(f"DEBUG: Campus distribution: {campus_distribution}")
     
     recent_stories = Story.query.filter_by(status='published').order_by(
         Story.created_at.desc()

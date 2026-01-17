@@ -162,6 +162,33 @@ const StoryPulseDashboard = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border p-6">
+  <h2 className="text-xl font-bold text-gray-900 mb-4">Campus Distribution</h2>
+  {stats.campus_distribution && Object.keys(stats.campus_distribution).length > 0 ? (
+    <div className="space-y-3">
+      {Object.entries(stats.campus_distribution).map(([campus, count], index) => (
+        <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <div className="flex-1">
+            <div className="font-medium text-gray-900">{campus}</div>
+            <div className="text-sm text-gray-500">{count} {count === 1 ? 'user' : 'users'}</div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <div className="text-2xl font-bold text-[#235D4C]">{count}</div>
+            <div className="w-20 bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-[#235D4C] h-2 rounded-full"
+                style={{ width: `${Math.min(100, (count / 10) * 100)}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-gray-500 text-center py-8">No campus data available</p>
+  )}
+</div>
+
+        <div className="bg-white rounded-lg shadow-sm border p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Hot Topics</h2>
           {hotTopics.length > 0 ? (
             <div className="space-y-3">
