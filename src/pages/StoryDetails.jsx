@@ -100,7 +100,7 @@ const StoryDetails = () => {
   if (loading) {
     return (
       <div className="section-ksg-padding">
-        <div className="container-ksg-max">
+        <div className="w-full px-4 lg:px-6">
           <div className="max-w-4xl mx-auto">
             <div className="animate-pulse">
               <div className="skeleton-ksg h-8 w-3/4 mb-4"></div>
@@ -119,7 +119,7 @@ const StoryDetails = () => {
   if (error || !story) {
     return (
       <div className="section-ksg-padding">
-        <div className="container-ksg-max">
+        <div className="w-full px-4 lg:px-6">
           <div className="text-center py-12">
             <svg className="mx-auto h-24 w-24 text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -142,7 +142,7 @@ const StoryDetails = () => {
 
   return (
     <div className="section-ksg-padding">
-      <div className="container-ksg-max">
+      <div className="w-full px-4 lg:px-6">
         <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
           <Link to="/" className="hover:text-blue-700 transition-colors">Home</Link>
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +242,7 @@ const StoryDetails = () => {
 
                     <button
                       onClick={handleShare}
-                      className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium bg-white border-2 border-[#B5955B] text-[#B5955B] hover:bg-[#B5955B]/5 transition-all"
+                      className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium bg-white border-2 border-[#CBD300] text-[#CBD300] hover:bg-[#CBD300]/5 transition-all"
                     >
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
@@ -438,7 +438,7 @@ const StoryDetails = () => {
                 </p>
                 <Link
                   to="/submit"
-                  className="inline-block px-4 py-2 bg-[#B5955B] hover:bg-[#B5955B]/90 text-white rounded-md font-medium transition-colors text-sm"
+                  className="inline-block px-4 py-2 bg-[#CBD300] hover:bg-[#CBD300]/90 text-[#7F622C] rounded-md font-medium transition-colors text-sm"
                 >
                   Submit Your Story
                 </Link>

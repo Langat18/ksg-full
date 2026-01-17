@@ -5,7 +5,6 @@ const StoryCard = ({ story }) => {
   const date = new Date(story.published_at || story.created_at || Date.now());
   const authorName = story.author?.full_name || story.author?.username || 'KSG Community';
   
-  // Format date nicely
   const formatDate = (dateObj) => {
     const now = new Date();
     const diffTime = Math.abs(now - dateObj);
@@ -18,6 +17,62 @@ const StoryCard = ({ story }) => {
     return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const getMediaIcon = (contentType, mediaUrl) => {
+    if (contentType === 'video' || mediaUrl?.includes('.mp4') || mediaUrl?.includes('.webm') || mediaUrl?.includes('.mov')) {
+      return (
+        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      );
+    }
+    
+    if (contentType === 'audio' || mediaUrl?.includes('.mp3') || mediaUrl?.includes('.wav') || mediaUrl?.includes('.m4a') || mediaUrl?.includes('.ogg')) {
+      return (
+        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+        </svg>
+      );
+    }
+    
+    if (contentType === 'document' || contentType === 'pdf' || mediaUrl?.includes('.pdf') || mediaUrl?.includes('.doc') || mediaUrl?.includes('.docx')) {
+      return (
+        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      );
+    }
+    
+    if (contentType === 'image' || mediaUrl?.includes('.jpg') || mediaUrl?.includes('.png') || mediaUrl?.includes('.jpeg') || mediaUrl?.includes('.gif')) {
+      return (
+        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      );
+    }
+    
+    return (
+      <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg>
+    );
+  };
+
+  const getMediaLabel = (contentType, mediaUrl) => {
+    if (contentType === 'video' || mediaUrl?.includes('.mp4') || mediaUrl?.includes('.webm') || mediaUrl?.includes('.mov')) {
+      return 'video';
+    }
+    if (contentType === 'audio' || mediaUrl?.includes('.mp3') || mediaUrl?.includes('.wav') || mediaUrl?.includes('.m4a')) {
+      return 'audio';
+    }
+    if (contentType === 'document' || contentType === 'pdf' || mediaUrl?.includes('.pdf') || mediaUrl?.includes('.doc')) {
+      return 'document';
+    }
+    if (contentType === 'image' || mediaUrl?.includes('.jpg') || mediaUrl?.includes('.png') || mediaUrl?.includes('.jpeg')) {
+      return 'image';
+    }
+    return contentType || 'file';
+  };
+
   return (
     <article className="card-ksg group relative">
       <div className="flex items-start space-x-3 mb-4">
@@ -27,7 +82,7 @@ const StoryCard = ({ story }) => {
           </svg>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-xl font-semibold text-[#1A1A1A] group-hover:text-[#235D4C] transition-colors leading-tight mb-2 line-clamp-2">
+          <h3 className="text-xl font-semibold text-[#1A1A1A] group-hover:text-[#7F622C] transition-colors leading-tight mb-2 line-clamp-2">
             <Link to={`/story/${story.id}`} className="hover:underline">
               {story.title}
             </Link>
@@ -60,7 +115,7 @@ const StoryCard = ({ story }) => {
               {story.category}
             </span>
           )}
-          {story.county && (
+          {story.county && story.county !== 'undefined' && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
               <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -70,21 +125,15 @@ const StoryCard = ({ story }) => {
           )}
           {story.media_url && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
-              <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {story.content_type === 'video' ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                )}
-              </svg>
-              {story.content_type || 'Media'}
+              {getMediaIcon(story.content_type, story.media_url)}
+              {getMediaLabel(story.content_type, story.media_url)}
             </span>
           )}
         </div>
         
         <Link 
           to={`/story/${story.id}`} 
-          className="inline-flex items-center text-[#235D4C] hover:text-[#B5955B] font-medium transform transition-all group-hover:translate-x-1"
+          className="inline-flex items-center text-[#7F622C] hover:text-[#CBD300] font-medium transform transition-all group-hover:translate-x-1"
         >
           Read Story
           <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +142,6 @@ const StoryCard = ({ story }) => {
         </Link>
       </div>
 
-      {/* Engagement Stats (if available) */}
       {(story.views > 0 || story.likes > 0 || story.shares > 0) && (
         <div className="mt-4 pt-4 border-t border-gray-100 flex items-center space-x-4 text-xs text-gray-500">
           {story.views > 0 && (
@@ -124,7 +172,6 @@ const StoryCard = ({ story }) => {
         </div>
       )}
 
-      {/* Professional hover indicator */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#235D4C] to-[#B5955B] rounded-b-xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
     </article>
   );

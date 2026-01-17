@@ -29,39 +29,39 @@ const NavBar = () => {
   ];
 
   return (
-    <header className="bg-[#235D4C] fixed top-0 left-0 right-0 z-[100] shadow-lg w-full h-16">
-      <div className="max-w-7xl mx-auto h-full">
-        <div className="flex items-center justify-between h-16 px-4 lg:px-6">
-          {/* Logo */}
-          <div className="flex items-center">
+    <header className="bg-[#7F622C] fixed top-0 left-0 right-0 z-[100] shadow-lg w-full h-48">
+      <div className="h-full w-full px-6 lg:px-12">
+        <div className="flex items-center justify-between h-48 gap-8">
+          {/* Logo - Far Left */}
+          <div className="flex-shrink-0 bg-white rounded-lg p-3 shadow-md">
             <Link to="/" className="flex items-center space-x-3">
               <img 
                 src="/assets/logo.png" 
                 alt="KSG Logo" 
-                className="h-12 w-auto" 
+                className="h-32 w-auto" 
                 onError={(e) => e.target.style.display = 'none'} 
               />
               <div className="hidden sm:block">
-                <div className="text-xl font-bold text-white">
+                <div className="text-4xl font-bold text-[#7F622C]">
                   KSG Storytelling
                 </div>
-                <div className="text-xs text-white/80 -mt-1">
+                <div className="text-sm text-gray-600 -mt-1">
                   Digital Narratives Platform
                 </div>
               </div>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
+          {/* Desktop Navigation - Center */}
+          <nav className="hidden md:flex items-center flex-grow justify-center space-x-3">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                className={`px-6 py-4 text-lg font-semibold rounded-lg transition-all duration-200 ${
                   isActiveLink(link.path)
-                    ? 'text-white bg-[#B5955B]'
-                    : 'text-white/90 hover:text-white hover:bg-white/10'
+                    ? 'text-[#7F622C] bg-[#CBD300]'
+                    : 'text-white hover:text-black hover:bg-white'
                 }`}
               >
                 {link.label}
@@ -71,10 +71,10 @@ const NavBar = () => {
             {isAdmin && (
               <Link
                 to="/admin"
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                className={`px-6 py-4 text-lg font-semibold rounded-lg transition-all duration-200 ${
                   isActiveLink('/admin')
-                    ? 'text-white bg-[#B5955B]'
-                    : 'text-white/90 hover:text-white hover:bg-white/10'
+                    ? 'text-[#7F622C] bg-[#CBD300]'
+                    : 'text-white hover:text-black hover:bg-white'
                 }`}
               >
                 Admin
@@ -82,16 +82,16 @@ const NavBar = () => {
             )}
           </nav>
 
-          {/* User Menu */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* User Menu - Far Right */}
+          <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
             {isAuthenticated ? (
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-white/10 transition-colors"
                 >
-                  <div className="h-8 w-8 bg-[#B5955B] rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">
+                  <div className="h-8 w-8 bg-[#CBD300] rounded-full flex items-center justify-center">
+                    <span className="text-[#7F622C] font-semibold text-sm">
                       {(user?.full_name || user?.username || 'U').charAt(0).toUpperCase()}
                     </span>
                   </div>
@@ -149,7 +149,7 @@ const NavBar = () => {
             ) : (
               <Link
                 to="/login"
-                className="px-4 py-2 rounded-md border-2 border-[#B5955B] text-white bg-[#B5955B] hover:bg-[#B5955B]/90 transition-all duration-200"
+                className="px-4 py-2 rounded-md border-2 border-[#CBD300] text-[#7F622C] bg-[#CBD300] hover:bg-[#CBD300]/90 transition-all duration-200"
               >
                 Login
               </Link>
@@ -157,10 +157,10 @@ const NavBar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex-shrink-0">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-white hover:text-[#B5955B] focus:outline-none transition-colors"
+              className="text-white hover:text-[#CBD300] focus:outline-none transition-colors"
             >
               <svg
                 className="h-6 w-6"
@@ -190,7 +190,7 @@ const NavBar = () => {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-white/20 bg-[#235D4C] fixed top-16 left-0 right-0 shadow-lg z-[90] max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="md:hidden border-t border-white/20 bg-[#7F622C] fixed top-24 left-0 right-0 shadow-lg z-[90] max-h-[calc(100vh-6rem)] overflow-y-auto">
             <div className="px-4 py-3 space-y-1">
               {navLinks.map((link) => (
                 <Link
@@ -198,7 +198,7 @@ const NavBar = () => {
                   to={link.path}
                   className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                     isActiveLink(link.path)
-                      ? 'text-white bg-[#B5955B]'
+                      ? 'text-[#7F622C] bg-[#CBD300]'
                       : 'text-white/90 hover:text-white hover:bg-white/10'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -212,7 +212,7 @@ const NavBar = () => {
                   to="/admin"
                   className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                     isActiveLink('/admin')
-                      ? 'text-white bg-[#B5955B]'
+                      ? 'text-[#7F622C] bg-[#CBD300]'
                       : 'text-white/90 hover:text-white hover:bg-white/10'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -225,8 +225,8 @@ const NavBar = () => {
                 {isAuthenticated ? (
                   <div className="space-y-2">
                     <div className="flex items-center px-3 py-2">
-                      <div className="h-10 w-10 bg-[#B5955B] rounded-full flex items-center justify-center mr-3">
-                        <span className="text-white font-semibold">
+                      <div className="h-10 w-10 bg-[#CBD300] rounded-full flex items-center justify-center mr-3">
+                        <span className="text-[#7F622C] font-semibold">
                           {(user?.full_name || user?.username || 'U').charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -236,7 +236,7 @@ const NavBar = () => {
                         </div>
                         <div className="text-xs text-white/70">{user?.email}</div>
                         {isAdmin && (
-                          <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-[#B5955B] text-white rounded">
+                          <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-[#CBD300] text-[#7F622C] rounded">
                             Admin
                           </span>
                         )}
@@ -259,7 +259,7 @@ const NavBar = () => {
                 ) : (
                   <Link
                     to="/login"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-center text-white bg-[#B5955B] hover:bg-[#B5955B]/90 transition-colors"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-center text-[#7F622C] bg-[#CBD300] hover:bg-[#CBD300]/90 transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Login

@@ -21,9 +21,10 @@ def get_analytics_summary():
     thirty_days_ago = datetime.utcnow() - timedelta(days=30)
     active_users = User.query.filter(User.last_login >= thirty_days_ago).count()
     
-    counties_covered = db.session.query(func.count(func.distinct(Story.county))).filter(
-        Story.status == 'published',
-        Story.county.isnot(None)
+    counties_covered = db.session.query(func.count(func.distinct(User.county))).filter(
+        User.county.isnot(None),
+        User.county != '',
+        User.county != 'undefined'
     ).scalar()
     
     top_category = db.session.query(
@@ -35,13 +36,14 @@ def get_analytics_summary():
     ).group_by(Story.category).order_by(desc('count')).first()
     
     counties_data = db.session.query(
-        Story.county,
-        func.count(Story.id).label('stories'),
-        func.sum(Story.views).label('plays')
-    ).filter(
-        Story.status == 'published',
-        Story.county.isnot(None)
-    ).group_by(Story.county).order_by(desc('stories')).limit(10).all()
+        User.county,
+        func.count(func.distinct(User.id)).label('users'),
+        func.count(Story.id).label('stories')
+    ).outerjoin(Story, (User.id == Story.author_id) & (Story.status == 'published')).filter(
+        User.county.isnot(None),
+        User.county != '',
+        User.county != 'undefined'
+    ).group_by(User.county).order_by(desc('users')).limit(10).all()
     
     hot_topics = db.session.query(
         Story.category,
@@ -73,9 +75,6 @@ def get_analytics_summary():
         if campus:
             campus_distribution[campus] = count
     
-    print(f"DEBUG: Campus stats query result: {campus_stats}")
-    print(f"DEBUG: Campus distribution: {campus_distribution}")
-    
     recent_stories = Story.query.filter_by(status='published').order_by(
         Story.created_at.desc()
     ).limit(10).all()
@@ -94,10 +93,10 @@ def get_analytics_summary():
         'counties_data': [
             {
                 'county': county,
-                'stories': stories,
-                'plays': plays if plays else 0
+                'users': users,
+                'stories': stories if stories else 0
             }
-            for county, stories, plays in counties_data
+            for county, users, stories in counties_data
         ],
         'hot_topics': [
             {
@@ -136,7 +135,7 @@ def get_user_analytics(user_id):
     user = User.query.get_or_404(user_id)
     current_user = User.query.get(current_user_id)
     
-    if current_user_id != user_id and current_user.role != 'admin':
+    if current_user_id != user_id and (not current_user or current_user.role != 'admin'):
         return jsonify({'error': 'Unauthorized'}), 403
     
     user_stories = Story.query.filter_by(author_id=user_id, status='published').all()

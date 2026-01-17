@@ -113,25 +113,22 @@ const Home = () => {
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0">
-          <div className="container-ksg-max h-full flex items-center">
+          <div className="w-full px-4 lg:px-6 h-full flex items-center">
             <div className="max-w-5xl mx-auto text-center animate-ksg-fade-in-up">
               <h1 className="text-4xl md:text-6xl font-bold text-black mb-6 leading-tight">
                 Transforming Kenya Through<br />
-                <span className="text-[#B5955B]">Shared Stories</span>
+                <span className="text-black">Shared Stories</span>
               </h1>
-              <p className="text-xl md:text-2xl text-black/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Discover authentic narratives of leadership, innovation, and impact from across Kenya's 47 counties
-              </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link 
                   to="/search" 
-                  className="btn-ksg-primary text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
+                  className="px-6 py-4 text-lg font-semibold rounded-lg transition-all duration-200 text-[#7F622C] bg-[#CBD300] hover:shadow-2xl shadow-xl"
                 >
                   Explore Stories
                 </Link>
                 <Link 
                   to="/submit" 
-                  className="btn-ksg-secondary text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
+                  className="px-6 py-4 text-lg font-semibold rounded-lg transition-all duration-200 text-white hover:text-black hover:bg-white shadow-xl hover:shadow-2xl"
                 >
                   Share Your Impact
                 </Link>
@@ -142,7 +139,7 @@ const Home = () => {
       </section>
 
       <section className="section-ksg-padding bg-white">
-        <div className="container-ksg-max">
+        <div className="w-full px-4 lg:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Transforming Kenya Together
@@ -169,7 +166,7 @@ const Home = () => {
       {/* Featured Story */}
       {featuredStory && (
         <section className="section-ksg-padding">
-          <div className="container-ksg-max">
+          <div className="w-full px-4 lg:px-6">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Featured Story
@@ -217,7 +214,7 @@ const Home = () => {
                       </div>
                     )}
                     <div className="absolute top-4 left-4">
-                      <span className="tag-ksg bg-[#B5955B] text-white">Featured</span>
+                      <span className="tag-ksg bg-[#CBD300] text-[#7F622C]">Featured</span>
                     </div>
                   </div>
                   <div className="flex flex-col justify-center">
@@ -271,7 +268,7 @@ const Home = () => {
       )}
 
       <section className="section-ksg-padding bg-gray-50">
-        <div className="container-ksg-max">
+        <div className="w-full px-4 lg:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Explore by Impact Area
@@ -317,7 +314,7 @@ const Home = () => {
 
       {/* Recent Stories */}
       <section className="section-ksg-padding">
-        <div className="container-ksg-max">
+        <div className="w-full px-4 lg:px-6">
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -371,8 +368,8 @@ const Home = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="section-ksg-padding bg-gradient-to-br from-[#235D4C] to-[#1a4438]">
-        <div className="container-ksg-max">
+      <section className="section-ksg-padding bg-gradient-to-br from-[#7F622C] to-[#5D4620]">
+        <div className="w-full px-4 lg:px-6">
           <div className="text-center text-white max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               Have a Story to Share?

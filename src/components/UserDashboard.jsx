@@ -46,7 +46,11 @@ const UserDashboard = () => {
         nextLevelPoints: 100
       });
     } catch (error) {
-      console.error('Failed to fetch user stats:', error);
+      if (error.response?.status === 403) {
+        console.warn('User analytics not available (permission denied)');
+      } else {
+        console.error('Failed to fetch user stats:', error);
+      }
       setStats({
         totalPoints: user?.points || 0,
         storiesContributed: 0,
@@ -75,41 +79,44 @@ const UserDashboard = () => {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#235D4C] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+      <div className="section-ksg-padding">
+        <div className="w-full px-4 lg:px-6">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7F622C] mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl text-white p-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+    <div className="section-ksg-padding">
+      <div className="w-full px-4 lg:px-6 space-y-8">
+        <div className="bg-[#7F622C] rounded-xl text-white p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.full_name || user?.username}!</h1>
-            <p className="text-blue-100 text-lg">Level: {stats.level}</p>
+            <p className="text-white/90 text-lg">Level: {stats.level}</p>
             {user?.campus && (
-              <p className="text-blue-200 text-sm mt-1">📍 {user.campus}</p>
+              <p className="text-white/80 text-sm mt-1">📍 {user.campus}</p>
             )}
             {user?.county && (
-              <p className="text-blue-200 text-sm">🗺️ {user.county} County</p>
+              <p className="text-white/80 text-sm">🗺️ {user.county} County</p>
             )}
           </div>
           <div className="mt-4 md:mt-0 text-center">
             <div className="text-4xl font-bold">{stats.totalPoints}</div>
-            <div className="text-blue-200 text-sm">Total Points</div>
+            <div className="text-white/80 text-sm">Total Points</div>
           </div>
         </div>
         
         <div className="mt-6">
-          <div className="flex justify-between text-sm text-blue-200 mb-2">
+          <div className="flex justify-between text-sm text-white/80 mb-2">
             <span>Progress to next level</span>
             <span>{stats.nextLevelPoints} points to go</span>
           </div>
-          <div className="w-full bg-blue-800 rounded-full h-3">
+          <div className="w-full bg-white/20 rounded-full h-3">
             <div 
               className="bg-yellow-400 h-3 rounded-full transition-all duration-500"
               style={{ width: `${levelProgress}%` }}
@@ -120,7 +127,7 @@ const UserDashboard = () => {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-blue-600 mb-1">{stats.storiesContributed}</div>
+          <div className="text-3xl font-bold text-[#CBD300] mb-1">{stats.storiesContributed}</div>
           <div className="text-gray-600 text-sm">Stories Shared</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
@@ -128,7 +135,7 @@ const UserDashboard = () => {
           <div className="text-gray-600 text-sm">Stories Viewed</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
-          <div className="text-3xl font-bold text-purple-600 mb-1">{stats.totalViews}</div>
+          <div className="text-3xl font-bold text-[#7F622C] mb-1">{stats.totalViews}</div>
           <div className="text-gray-600 text-sm">Total Views</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
@@ -146,7 +153,7 @@ const UserDashboard = () => {
                 key={index}
                 className={`p-4 rounded-lg border-2 text-center transition-all ${
                   badge.earned 
-                    ? 'border-blue-200 bg-blue-50' 
+                    ? 'border-[#CBD300]/30 bg-[#CBD300]/5' 
                     : 'border-gray-200 bg-gray-50 opacity-60'
                 }`}
               >
@@ -173,7 +180,7 @@ const UserDashboard = () => {
               </p>
               <Link 
                 to="/submit" 
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+                className="inline-block bg-[#CBD300] hover:bg-[#CBD300]/90 text-[#7F622C] py-3 px-6 rounded-lg font-medium transition-colors"
               >
                 Create Story (+50 points)
               </Link>
@@ -191,13 +198,13 @@ const UserDashboard = () => {
               </div>
               <Link 
                 to="/submit" 
-                className="block w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors text-center"
+                className="block w-full bg-[#CBD300] hover:bg-[#CBD300]/90 text-[#7F622C] py-2 px-4 rounded-lg font-medium transition-colors text-center"
               >
                 Share Another Story (+50 points)
               </Link>
               <Link 
                 to="/pathways" 
-                className="block w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg font-medium transition-colors text-center"
+                className="block w-full bg-[#7F622C] hover:bg-[#5D4620] text-white py-2 px-4 rounded-lg font-medium transition-colors text-center"
               >
                 Explore Learning Pathways
               </Link>
@@ -206,7 +213,7 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg text-white p-6">
+      <div className="bg-[#7F622C] rounded-lg text-white p-6">
         <h2 className="text-xl font-bold mb-4">Discover Stories from Across Kenya</h2>
         <p className="mb-4">Explore transformational stories from all 47 counties and 5 KSG campuses</p>
         <div className="grid md:grid-cols-3 gap-4">
@@ -236,6 +243,7 @@ const UserDashboard = () => {
           </Link>
         </div>
       </div>
+    </div>
     </div>
   );
 };

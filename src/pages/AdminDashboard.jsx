@@ -57,11 +57,11 @@ const AdminDashboard = () => {
 
   if (!isAdmin) {
     return (
-      <div className="max-w-7xl mx-auto py-12 px-4">
+      <div className="w-full py-12 px-4 lg:px-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
           <p className="text-gray-600 mb-6">You need admin privileges to access this page.</p>
-          <Link to="/" className="bg-[#235D4C] text-white px-6 py-2 rounded-lg hover:bg-[#1a4438] transition">
+          <Link to="/" className="bg-[#7F622C] text-white px-6 py-2 rounded-lg hover:bg-[#9A774A] transition">
             Go Home
           </Link>
         </div>
@@ -71,9 +71,9 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto py-12">
+      <div className="w-full py-12 px-4 lg:px-6">
         <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#235D4C]"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7F622C]"></div>
           <span className="ml-3 text-gray-600">Loading admin dashboard...</span>
         </div>
       </div>
@@ -94,9 +94,9 @@ const AdminDashboard = () => {
   const topCategory = Object.keys(categoryCount).sort((a, b) => categoryCount[b] - categoryCount[a])[0] || 'N/A';
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="w-full space-y-8 px-4 lg:px-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#235D4C] to-[#1a4438] rounded-xl text-white p-8">
+      <div className="bg-gradient-to-r from-[#7F622C] to-[#5D4620] rounded-xl text-white p-8">
         <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
         <p className="text-white/80">Welcome back, {user?.full_name || user?.username}</p>
       </div>
@@ -108,7 +108,7 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab('overview')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'overview'
-                ? 'border-[#B5955B] text-[#235D4C]'
+                ? 'border-[#CBD300] text-[#7F622C]'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -118,7 +118,7 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab('stories')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'stories'
-                ? 'border-[#B5955B] text-[#235D4C]'
+                ? 'border-[#CBD300] text-[#7F622C]'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -135,7 +135,7 @@ const AdminDashboard = () => {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm text-gray-500">Total Stories</div>
-                <svg className="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-8 w-8 text-[#7F622C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
@@ -158,7 +158,7 @@ const AdminDashboard = () => {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm text-gray-500">Total Engagement</div>
-                <svg className="h-8 w-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-8 w-8 text-[#CBD300]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
@@ -267,7 +267,7 @@ const AdminDashboard = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                       <Link
                         to={`/story/${story.id}`}
-                        className="text-[#235D4C] hover:text-[#B5955B]"
+                        className="text-[#7F622C] hover:text-[#CBD300]"
                       >
                         View
                       </Link>

@@ -148,7 +148,7 @@ const Login = () => {
   if (showForgotPassword) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center section-ksg-padding">
-        <div className="max-w-md w-full mx-auto">
+        <div className="w-full flex justify-center px-4">
           <div className="text-center mb-8">
             <div className="mx-auto h-20 w-20 bg-gradient-to-br from-[#235D4C] to-[#B5955B] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
               <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +188,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 px-6 bg-[#B5955B] hover:bg-[#B5955B]/90 text-white rounded-lg font-semibold transition-all disabled:opacity-50"
+                className="w-full py-4 px-6 bg-[#CBD300] hover:bg-[#CBD300]/90 text-[#7F622C] rounded-lg font-semibold transition-all disabled:opacity-50"
               >
                 {loading ? 'Sending...' : 'Send Reset Link'}
               </button>
@@ -376,7 +376,7 @@ const Login = () => {
               className={`w-full flex justify-center py-4 px-6 border-2 border-transparent rounded-lg shadow-md text-base font-semibold text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 loading
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-[#B5955B] hover:bg-[#B5955B]/90 hover:border-[#235D4C]/50 focus:ring-[#B5955B]/20'
+                  : 'bg-[#CBD300] hover:bg-[#CBD300]/90 hover:border-[#7F622C]/50 focus:ring-[#CBD300]/20'
               }`}
             >
               {loading ? (
@@ -467,7 +467,7 @@ const Login = () => {
           </p>
           <div className="flex items-center justify-center space-x-6">
             <div className="flex items-center space-x-2">
-              <div className="h-3 w-3 bg-[#235D4C] rounded-full animate-pulse"></div>
+              <div className="h-3 w-3 bg-[#7F622C] rounded-full animate-pulse"></div>
               <span className="text-xs text-[#235D4C]/70 font-medium">Secure Platform</span>
             </div>
             <div className="flex items-center space-x-2">

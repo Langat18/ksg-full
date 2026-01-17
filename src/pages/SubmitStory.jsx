@@ -69,70 +69,69 @@ const SubmitStory = () => {
 
   return (
     <div className="section-ksg-padding" style={{ backgroundColor: 'var(--ksg-light-gray)' }}>
-      <div className="container-ksg-max">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div 
-              className="mx-auto h-16 w-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
-              style={{ 
-                background: 'linear-gradient(135deg, var(--ksg-primary), var(--ksg-primary-light))' 
-              }}
-            >
-              <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Share Your Impact Story
-            </h1>
-            <div className="text-ksg-gradient text-xl font-semibold mb-4">
-              Contribute to Kenya's Knowledge Network
-            </div>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Share your transformational experiences and insights that are making a difference across Kenya
-            </p>
+      <div className="w-full px-4 lg:px-6">
+        {/* Header */}
+        <div className="text-center mb-12 max-w-4xl mx-auto">
+          <div 
+            className="mx-auto h-16 w-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
+            style={{ 
+              background: 'linear-gradient(135deg, var(--ksg-primary), var(--ksg-primary-light))' 
+            }}
+          >
+            <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
           </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Share Your Impact Story
+          </h1>
+          <div className="text-ksg-gradient text-xl font-semibold mb-4">
+            Contribute to Kenya's Knowledge Network
+          </div>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Share your transformational experiences and insights that are making a difference across Kenya
+          </p>
+        </div>
 
-          {/* Status Messages */}
-          {status?.type === 'success' && (
-            <div className="alert-ksg-success mb-8">
-              <div className="flex items-start space-x-3">
-                <svg 
-                  className="h-6 w-6 flex-shrink-0 mt-0.5" 
-                  style={{ color: 'var(--ksg-success)' }} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <h3 className="font-semibold">Story Submitted Successfully!</h3>
-                  <p className="mt-1">
-                    Your story &quot;{submittedStory?.title || 'Untitled'}&quot; has been published and is now live!
-                  </p>
-                  <p className="mt-2 text-sm">
-                    You earned <span className="font-bold text-green-600">+50 points</span> for this contribution.
-                  </p>
-                  <div className="mt-4 flex space-x-3">
-                    <button onClick={resetForm} className="btn-ksg-outline">
-                      Submit Another Story
-                    </button>
-                    <Link to={`/story/${submittedStory?.id}`} className="btn-ksg-primary">
-                      View Your Story
-                    </Link>
-                    <Link to="/dashboard" className="btn-ksg-secondary">
-                      Go to Dashboard
-                    </Link>
-                  </div>
+        {/* Status Messages */}
+        {status?.type === 'success' && (
+          <div className="alert-ksg-success mb-8 max-w-4xl mx-auto">
+            <div className="flex items-start space-x-3">
+              <svg 
+                className="h-6 w-6 flex-shrink-0 mt-0.5" 
+                style={{ color: 'var(--ksg-success)' }} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h3 className="font-semibold">Story Submitted Successfully!</h3>
+                <p className="mt-1">
+                  Your story &quot;{submittedStory?.title || 'Untitled'}&quot; has been published and is now live!
+                </p>
+                <p className="mt-2 text-sm">
+                  You earned <span className="font-bold text-green-600">+50 points</span> for this contribution.
+                </p>
+                <div className="mt-4 flex space-x-3">
+                  <button onClick={resetForm} className="btn-ksg-outline">
+                    Submit Another Story
+                  </button>
+                  <Link to={`/story/${submittedStory?.id}`} className="btn-ksg-primary">
+                    View Your Story
+                  </Link>
+                  <Link to="/dashboard" className="btn-ksg-secondary">
+                    Go to Dashboard
+                  </Link>
                 </div>
               </div>
+            </div>
             </div>
           )}
 
           {status?.type === 'error' && (
-            <div className="alert-ksg-error mb-8">
+            <div className="alert-ksg-error mb-8 max-w-4xl mx-auto">
               <div className="flex items-start space-x-3">
                 <svg 
                   className="h-6 w-6 flex-shrink-0 mt-0.5" 
@@ -158,25 +157,25 @@ const SubmitStory = () => {
             </div>
           )}
 
-          {status?.type === 'pending' && (
-            <div className="alert-ksg-info mb-8">
-              <div className="flex items-center space-x-3">
-                <div 
-                  className="animate-spin rounded-full h-6 w-6 border-b-2" 
-                  style={{ borderColor: 'var(--ksg-info)' }}
-                ></div>
-                <div>
-                  <h3 className="font-semibold">Submitting Your Story...</h3>
-                  <p className="mt-1">Please wait while we process your submission.</p>
-                </div>
+        {status?.type === 'pending' && (
+          <div className="alert-ksg-info mb-8 max-w-4xl mx-auto">
+            <div className="flex items-center space-x-3">
+              <div 
+                className="animate-spin rounded-full h-6 w-6 border-b-2" 
+                style={{ borderColor: 'var(--ksg-info)' }}
+              ></div>
+              <div>
+                <h3 className="font-semibold">Submitting Your Story...</h3>
+                <p className="mt-1">Please wait while we process your submission.</p>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Guidelines */}
-          {status?.type !== 'success' && (
-            <>
-              <div className="card-ksg mb-8">
+        {/* Guidelines */}
+        {status?.type !== 'success' && (
+          <>
+            <div className="card-ksg mb-8 max-w-4xl mx-auto">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Submission Guidelines</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
@@ -229,12 +228,11 @@ const SubmitStory = () => {
               </div>
 
               {/* Story Form */}
-              <div className="card-ksg-featured">
+              <div className="card-ksg-featured max-w-4xl mx-auto">
                 <StoryForm onSubmit={handleSubmit} loading={status?.type === 'pending'} />
               </div>
             </>
           )}
-        </div>
       </div>
     </div>
   );

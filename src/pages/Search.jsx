@@ -77,7 +77,7 @@ const Search = () => {
 
   return (
     <div className="section-ksg-padding">
-      <div className="container-ksg-max">
+      <div className="w-full px-4 lg:px-6">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -131,7 +131,7 @@ const Search = () => {
               <button 
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center px-6 py-3 bg-[#B5955B] text-white font-medium rounded-md hover:bg-[#B5955B]/90 focus:outline-none focus:ring-2 focus:ring-[#B5955B]/20 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="inline-flex items-center px-6 py-3 bg-[#CBD300] text-[#7F622C] font-medium rounded-md hover:bg-[#CBD300]/90 focus:outline-none focus:ring-2 focus:ring-[#CBD300]/20 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {loading ? (
                   <>
@@ -160,8 +160,8 @@ const Search = () => {
                 onClick={() => handleCategorySelect(cat)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   category === cat
-                    ? 'bg-[#B5955B] text-white shadow-md'
-                    : 'bg-white text-gray-700 border-2 border-[#B5955B]/30 hover:border-[#B5955B]/50 hover:bg-[#B5955B]/5'
+                    ? 'bg-[#CBD300] text-[#7F622C] shadow-md'
+                    : 'bg-white text-gray-700 border-2 border-[#CBD300]/30 hover:border-[#CBD300]/50 hover:bg-[#CBD300]/5'
                 }`}
               >
                 {cat}
@@ -231,13 +231,13 @@ const Search = () => {
                           setResults([]);
                           setSearchParams({});
                         }}
-                        className="px-6 py-3 border-2 border-[#B5955B] text-[#B5955B] font-medium rounded-md hover:bg-[#B5955B]/5 focus:outline-none focus:ring-2 focus:ring-[#B5955B]/20 focus:ring-offset-2 transition-all duration-200 shadow-sm"
+                        className="px-6 py-3 border-2 border-[#CBD300] text-[#CBD300] font-medium rounded-md hover:bg-[#CBD300]/5 focus:outline-none focus:ring-2 focus:ring-[#CBD300]/20 focus:ring-offset-2 transition-all duration-200 shadow-sm"
                       >
                         Clear Search
                       </button>
                       <Link 
                         to="/submit"
-                        className="px-6 py-3 bg-[#B5955B] text-white font-medium rounded-md hover:bg-[#B5955B]/90 focus:outline-none focus:ring-2 focus:ring-[#B5955B]/20 focus:ring-offset-2 transition-all duration-200 shadow-sm"
+                        className="px-6 py-3 bg-[#CBD300] text-[#7F622C] font-medium rounded-md hover:bg-[#CBD300]/90 focus:outline-none focus:ring-2 focus:ring-[#CBD300]/20 focus:ring-offset-2 transition-all duration-200 shadow-sm"
                       >
                         Share Your Story
                       </Link>
@@ -268,7 +268,7 @@ const Search = () => {
                     setQuery(term.toLowerCase());
                     performSearch(term.toLowerCase(), '');
                   }}
-                  className="p-3 rounded-lg font-medium text-[#B5955B] bg-[#B5955B]/10 hover:bg-[#B5955B]/20 transition-all duration-200"
+                  className="p-3 rounded-lg font-medium text-[#CBD300] bg-[#CBD300]/10 hover:bg-[#CBD300]/20 transition-all duration-200"
                 >
                   {term}
                 </button>

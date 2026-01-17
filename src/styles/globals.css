@@ -4,8 +4,8 @@
 
 /* KSG Theme Colors */
 :root {
-  --color-ksg-gold: #B5955B;
-  --color-ksg-gold-dark: #8C6A3C;
+  --color-ksg-gold: #CBD300;
+  --color-ksg-gold-dark: #A39C00;
   --color-white: #FFFFFF;
   --color-black: rgb(28, 20, 0);
   --color-transparent-white: rgba(255, 255, 255, 0.9);
@@ -35,15 +35,15 @@ body {
   }
 
   .input-ksg {
-    @apply w-full px-4 py-3 rounded-md border-2 border-[#235D4C]/20 bg-white focus:outline-none transition-all duration-200 text-gray-800 placeholder-gray-400;
+    @apply w-full px-4 py-3 rounded-md border-2 border-[#7F622C]/20 bg-white focus:outline-none transition-all duration-200 text-gray-800 placeholder-gray-400;
   }
 
   .input-ksg:hover {
-    @apply border-[#235D4C]/30;
+    @apply border-[#7F622C]/30;
   }
 
   .focus-ksg:focus {
-    @apply border-[#B5955B] ring-1 ring-[#B5955B]/20 shadow-sm;
+    @apply border-[#CBD300] ring-1 ring-[#CBD300]/20 shadow-sm;
   }
 
   .form-ksg-help {
@@ -51,14 +51,14 @@ body {
   }
 
   .btn-ksg-primary {
-    @apply px-6 py-3 bg-[#235D4C] text-white rounded-md font-medium hover:bg-[#2d7660] transform transition-all duration-300 hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#235D4C] focus:ring-offset-2;
+    @apply px-6 py-3 bg-[#7F622C] text-white rounded-md font-medium hover:bg-[#9A774A] transform transition-all duration-300 hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#7F622C] focus:ring-offset-2;
   }
 }
 
 @layer utilities {
   /* File input styling */
   .input-ksg[type='file'] {
-    @apply file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-[#235D4C] file:text-white hover:file:cursor-pointer hover:file:bg-[#2d7660] text-sm text-gray-500;
+    @apply file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-[#7F622C] file:text-white hover:file:cursor-pointer hover:file:bg-[#9A774A] text-sm text-gray-500;
   }
 
   /* Select element styling */
@@ -92,12 +92,12 @@ body {
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
-  border: 1px solid rgba(181, 149, 91, 0.2);
+  border: 1px solid rgba(203, 211, 0, 0.2);
   transition: all 0.2s;
 }
 
 .card:hover {
-  border-color: rgba(181, 149, 91, 0.4);
+  border-color: rgba(203, 211, 0, 0.4);
 }
 
 .input-field {

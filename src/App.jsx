@@ -10,15 +10,16 @@ import UserDashboard from './components/UserDashboard';
 import LearningPathways from './components/LearningPathways';
 import StoryPulseDashboard from './components/StoryPulseDashboard';
 import NavBar from './components/NavBar';
+import Footer from './components/Footer';
 import { useAuth } from './context/AuthContext';
 
 export default function App() {
   const { user, isAuthenticated } = useAuth();
   
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
+    <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col">
       <NavBar />
-      <main className="pt-16 relative z-[1]">
+      <main className="pt-48 relative z-[1] flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/submit" element={<SubmitStory />} />
@@ -37,7 +38,7 @@ export default function App() {
           />
           <Route path="*" element={
             <div className="section-ksg-padding">
-              <div className="container-ksg-max">
+              <div className="w-full px-4 lg:px-6">
                 <div className="text-center">
                   <h1 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h1>
                   <p className="text-gray-600 mb-6">The page you're looking for doesn't exist.</p>
@@ -48,6 +49,7 @@ export default function App() {
           } />
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 }

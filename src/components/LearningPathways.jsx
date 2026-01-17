@@ -80,17 +80,20 @@ const LearningPathways = () => {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#235D4C]"></div>
-          <span className="ml-3 text-gray-600">Loading pathways...</span>
+      <div className="section-ksg-padding">
+        <div className="w-full px-4 lg:px-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#235D4C]"></div>
+            <span className="ml-3 text-gray-600">Loading pathways...</span>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="section-ksg-padding">
+      <div className="w-full px-4 lg:px-6 space-y-8">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Learning Pathways</h1>
@@ -116,11 +119,11 @@ const LearningPathways = () => {
               </div>
               <div className="text-sm text-[#B5955B]/80">Stories Completed</div>
             </div>
-            <div className="text-center p-4 bg-[#235D4C]/5 rounded-lg">
-              <div className="text-2xl font-bold text-[#235D4C]">
+            <div className="text-center p-4 bg-[#7F622C]/5 rounded-lg">
+              <div className="text-2xl font-bold text-[#7F622C]">
                 {pathways.filter(p => p.completed === p.stories_count).length}
               </div>
-              <div className="text-sm text-[#235D4C]/80">Pathways Finished</div>
+              <div className="text-sm text-[#7F622C]/80">Pathways Finished</div>
             </div>
             <div className="text-center p-4 bg-[#B5955B]/5 rounded-lg">
               <div className="text-2xl font-bold text-[#B5955B]">
@@ -145,7 +148,7 @@ const LearningPathways = () => {
             return (
               <div key={pathway.id} className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow">
                 {/* Pathway Header */}
-                <div className="bg-[#B5955B] text-white p-6">
+                <div className="bg-[#CBD300] text-[#7F622C] p-6">
                   <div className="flex flex-col md:flex-row md:items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
@@ -240,7 +243,7 @@ const LearningPathways = () => {
                                 ) : isCurrent ? (
                                   <Link
                                     to={`/story/${story?.id}`}
-                                    className="bg-[#B5955B] hover:bg-[#B5955B]/90 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                                    className="bg-[#CBD300] hover:bg-[#CBD300]/90 text-[#7F622C] px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                                   >
                                     Continue
                                   </Link>
@@ -293,7 +296,7 @@ const LearningPathways = () => {
                           ) : (
                             <Link
                               to={`/story/${steps[0]?.story?.id}`}
-                              className="bg-[#B5955B] hover:bg-[#B5955B]/90 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-sm"
+                              className="bg-[#CBD300] hover:bg-[#CBD300]/90 text-[#7F622C] px-6 py-2 rounded-lg font-medium transition-colors shadow-sm"
                             >
                               Start Pathway
                             </Link>
@@ -329,7 +332,7 @@ const LearningPathways = () => {
           </p>
           <Link
             to="/submit"
-            className="inline-block bg-[#B5955B] hover:bg-[#B5955B]/90 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="inline-block bg-[#CBD300] hover:bg-[#CBD300]/90 text-[#7F622C] px-6 py-3 rounded-lg font-medium transition-colors"
           >
             Share Your Story
           </Link>
@@ -354,6 +357,7 @@ const LearningPathways = () => {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 };
