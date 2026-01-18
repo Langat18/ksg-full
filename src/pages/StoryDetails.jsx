@@ -24,7 +24,10 @@ const StoryDetails = () => {
         setError(null);
         
         const storyData = await fetchStory(id);
-        console.log('📄 Story loaded:', storyData.title, 'Type:', storyData.content_type);
+        console.log('📄 Story loaded:', storyData);
+        console.log('Content Type:', storyData.content_type);
+        console.log('County:', storyData.county);
+        console.log('Category:', storyData.category);
         setStory(storyData);
         
         try {
@@ -190,7 +193,7 @@ const StoryDetails = () => {
                     </span>
                   )}
 
-                  {story.county && (
+                  {story.county && story.county !== 'undefined' && (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
                       <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -259,7 +262,6 @@ const StoryDetails = () => {
                 </div>
               </div>
 
-              {/* 🔥 USE IMMERSIVE PLAYER FOR ALL MEDIA */}
               {story.media_url && (
                 <div className="mb-8">
                   <ImmersivePlayer story={story} onShare={handleShare} />

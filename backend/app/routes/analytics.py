@@ -67,13 +67,15 @@ def get_analytics_summary():
         func.count(User.id).label('user_count')
     ).filter(
         User.campus.isnot(None),
-        User.campus != ''
+        User.campus != '',
+        User.campus != 'undefined',
+        User.campus != 'null'
     ).group_by(User.campus).all()
     
     campus_distribution = {}
     for campus, count in campus_stats:
-        if campus:
-            campus_distribution[campus] = count
+        if campus and campus.strip():
+            campus_distribution[campus.strip()] = count
     
     recent_stories = Story.query.filter_by(status='published').order_by(
         Story.created_at.desc()
@@ -176,7 +178,6 @@ def format_time_ago(dt):
     
     now = datetime.utcnow()
     diff = now - dt
-    
     seconds = diff.total_seconds()
     
     if seconds < 60:
