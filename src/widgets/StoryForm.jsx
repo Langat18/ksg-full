@@ -5,6 +5,8 @@ const StoryForm = ({ onSubmit, loading }) => {
     title: '',
     description: '',
     category: '',
+    county: '',
+    contentType: '',
     transcript: '',
     authorName: '',
     authorEmail: '',
@@ -20,13 +22,51 @@ const StoryForm = ({ onSubmit, loading }) => {
     'Community Impact'
   ];
 
+  const kenyanCounties = [
+    'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Garissa',
+    'Homa Bay', 'Isiolo', 'Kajiado', 'Kakamega', 'Kericho', 'Kiambu', 'Kilifi',
+    'Kirinyaga', 'Kisii', 'Kisumu', 'Kitui', 'Kwale', 'Laikipia', 'Lamu', 'Machakos',
+    'Makueni', 'Mandera', 'Marsabit', 'Meru', 'Migori', 'Mombasa', 'Murang\'a',
+    'Nairobi', 'Nakuru', 'Nandi', 'Narok', 'Nyamira', 'Nyandarua', 'Nyeri',
+    'Samburu', 'Siaya', 'Taita-Taveta', 'Tana River', 'Tharaka-Nithi', 'Trans Nzoia',
+    'Turkana', 'Uasin Gishu', 'Vihiga', 'Wajir', 'West Pokot'
+  ];
+
+  const contentTypes = [
+    { value: 'video', label: 'Video' },
+    { value: 'audio', label: 'Audio/Podcast' },
+    { value: 'document', label: 'Document/PDF' },
+    { value: 'image', label: 'Image' }
+  ];
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
-    setFormData(prev => ({ ...prev, file: e.target.files[0] || null }));
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prev => ({ ...prev, file }));
+      
+      if (!formData.contentType) {
+        const fileType = file.type.split('/')[0];
+        const extension = file.name.split('.').pop().toLowerCase();
+        
+        let detectedType = 'document';
+        if (fileType === 'video' || ['mp4', 'webm', 'mov', 'avi'].includes(extension)) {
+          detectedType = 'video';
+        } else if (fileType === 'audio' || ['mp3', 'wav', 'm4a', 'ogg', 'aac'].includes(extension)) {
+          detectedType = 'audio';
+        } else if (fileType === 'image' || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
+          detectedType = 'image';
+        } else if (['pdf', 'doc', 'docx'].includes(extension)) {
+          detectedType = 'document';
+        }
+        
+        setFormData(prev => ({ ...prev, contentType: detectedType }));
+      }
+    }
   };
 
   const handleSubmit = (e) => {
@@ -49,20 +89,38 @@ const StoryForm = ({ onSubmit, loading }) => {
         />
       </div>
 
-      <div className="mb-6 relative">
-        <label className="block text-sm font-medium text-[#7F622C] mb-2">Category *</label>
-        <select
-          name="category"
-          required
-          value={formData.category}
-          onChange={handleInputChange}
-          className="w-full px-4 py-3 rounded-md border-2 border-[#7F622C]/30 bg-white text-gray-800 focus:border-[#CBD300] focus:ring-1 focus:ring-[#CBD300]/20 focus:outline-none transition-all duration-200 hover:border-[#7F622C]/50 appearance-none bg-no-repeat bg-[length:1.5em_1.5em] bg-right"
-        >
-          <option value="">Select a category</option>
-          {categories.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mb-6 relative">
+          <label className="block text-sm font-medium text-[#7F622C] mb-2">Category *</label>
+          <select
+            name="category"
+            required
+            value={formData.category}
+            onChange={handleInputChange}
+            className="w-full px-4 py-3 rounded-md border-2 border-[#7F622C]/30 bg-white text-gray-800 focus:border-[#CBD300] focus:ring-1 focus:ring-[#CBD300]/20 focus:outline-none transition-all duration-200 hover:border-[#7F622C]/50"
+          >
+            <option value="">Select a category</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-6 relative">
+          <label className="block text-sm font-medium text-[#7F622C] mb-2">County *</label>
+          <select
+            name="county"
+            required
+            value={formData.county}
+            onChange={handleInputChange}
+            className="w-full px-4 py-3 rounded-md border-2 border-[#7F622C]/30 bg-white text-gray-800 focus:border-[#CBD300] focus:ring-1 focus:ring-[#CBD300]/20 focus:outline-none transition-all duration-200 hover:border-[#7F622C]/50"
+          >
+            <option value="">Select county</option>
+            {kenyanCounties.map(county => (
+              <option key={county} value={county}>{county}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="mb-6 relative">
@@ -106,15 +164,35 @@ const StoryForm = ({ onSubmit, loading }) => {
       </div>
 
       <div className="mb-6 relative">
-        <label className="block text-sm font-medium text-[#7F622C] mb-2">Upload Media (Optional)</label>
+        <label className="block text-sm font-medium text-[#7F622C] mb-2">Content Type *</label>
+        <select
+          name="contentType"
+          required
+          value={formData.contentType}
+          onChange={handleInputChange}
+          className="w-full px-4 py-3 rounded-md border-2 border-[#7F622C]/30 bg-white text-gray-800 focus:border-[#CBD300] focus:ring-1 focus:ring-[#CBD300]/20 focus:outline-none transition-all duration-200 hover:border-[#7F622C]/50"
+        >
+          <option value="">Select content type</option>
+          {contentTypes.map(type => (
+            <option key={type.value} value={type.value}>{type.label}</option>
+          ))}
+        </select>
+        <div className="mt-2 text-sm text-[#7F622C]/70">
+          This will be auto-detected when you upload a file
+        </div>
+      </div>
+
+      <div className="mb-6 relative">
+        <label className="block text-sm font-medium text-[#7F622C] mb-2">Upload Media *</label>
         <input
           type="file"
-          accept="video/*,audio/*,.pdf,.doc,.docx"
+          accept="video/*,audio/*,.pdf,.doc,.docx,image/*"
           onChange={handleFileChange}
+          required
           className="w-full px-4 py-3 rounded-md border-2 border-[#7F622C]/30 bg-white text-gray-800 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-[#7F622C] file:text-white hover:file:bg-[#9A774A] text-sm text-gray-500 focus:border-[#CBD300] focus:ring-1 focus:ring-[#CBD300]/20 focus:outline-none transition-all duration-200"
         />
         <div className="mt-2 text-sm text-[#7F622C]/70">
-          Video, Audio, PDF, or Document files (max 100MB)
+          Video, Audio, Image, PDF, or Document files (max 50MB)
         </div>
       </div>
 
@@ -136,7 +214,7 @@ const StoryForm = ({ onSubmit, loading }) => {
           disabled={loading}
           className="px-6 py-3 bg-[#CBD300] text-[#7F622C] rounded-md font-medium hover:bg-[#CBD300]/90 transform transition-all duration-300 hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#CBD300] focus:ring-offset-2"
         >
-          {loading ? 'Submitting...' : 'Submit Story for Review'}
+          {loading ? 'Submitting...' : 'Submit Story'}
         </button>
       </div>
     </form>

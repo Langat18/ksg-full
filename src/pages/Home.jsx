@@ -19,13 +19,14 @@ const Home = () => {
     { name: 'Policy in Action', count: 0, icon: '📊' },
     { name: 'Research Brief', count: 0, icon: '🔬' },
     { name: 'From the Classroom', count: 0, icon: '📚' },
+    { name: 'Innovation Story', count: 0, icon: '💡' },
+    { name: 'Community Impact', count: 0, icon: '🤝' }
   ]);
 
   useEffect(() => {
     const fetchHomeData = async () => {
       setLoading(true);
       try {
-        // Fetch stories
         const storiesData = await fetchStories({ limit: 12 });
         const storiesArray = storiesData.results ?? storiesData;
         setStories(storiesArray);
@@ -46,7 +47,6 @@ const Home = () => {
               policyAreas: analytics.hot_topics?.length || 0
             });
 
-            // Update category counts from real data
             if (analytics.hot_topics && analytics.hot_topics.length > 0) {
               setCategories(prevCategories => 
                 prevCategories.map(cat => {
@@ -70,7 +70,6 @@ const Home = () => {
             policyAreas: new Set(storiesArray.map(s => s.category).filter(Boolean)).size
           });
 
-          // Count categories from stories
           const categoryCounts = {};
           storiesArray.forEach(story => {
             if (story.category) {
@@ -105,8 +104,7 @@ const Home = () => {
 
   return (
     <div className="space-y-16">
-      {/* KSG Hero Section with Background Image - Clear Image */}
-      <section className="relative h-[600px] rounded-2xl overflow-hidden">
+      <section className="relative h-[1000px] rounded-2xl overflow-hidden">
         <img 
           src="/assets/homepage.png" 
           alt="KSG Homepage" 
@@ -163,7 +161,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Story */}
       {featuredStory && (
         <section className="section-ksg-padding">
           <div className="w-full px-4 lg:px-6">
@@ -312,7 +309,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Recent Stories */}
       <section className="section-ksg-padding">
         <div className="w-full px-4 lg:px-6">
           <div className="flex items-center justify-between mb-12">
@@ -367,8 +363,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="section-ksg-padding bg-gradient-to-br from-[#7F622C] to-[#5D4620]">
+      {/* <section className="section-ksg-padding bg-gradient-to-br from-[#7F622C] to-[#5D4620]">
         <div className="w-full px-4 lg:px-6">
           <div className="text-center text-white max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -400,7 +395,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };
