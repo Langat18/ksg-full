@@ -104,7 +104,7 @@ const Home = () => {
 
   return (
     <div className="space-y-16">
-      <section className="relative h-[1000px] rounded-2xl overflow-hidden">
+      <section className="relative h-[900px] rounded-2xl overflow-hidden">
         <img 
           src="/assets/homepage.png" 
           alt="KSG Homepage" 
