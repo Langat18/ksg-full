@@ -8,20 +8,17 @@ class Pathway(db.Model):
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
     category = db.Column(db.String(100))
-    difficulty = db.Column(db.String(50))  # Beginner, Intermediate, Advanced
-    duration = db.Column(db.String(50))  # e.g., "2 hours"
+    difficulty = db.Column(db.String(50))
+    duration = db.Column(db.String(50))
     points_reward = db.Column(db.Integer, default=50)
-    
-    # Status
     is_active = db.Column(db.Boolean, default=True)
-    
-    # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships
-    items = db.relationship('PathwayItem', back_populates='pathway', lazy='dynamic', order_by='PathwayItem.order')
-    progress = db.relationship('PathwayProgress', back_populates='pathway', lazy='dynamic')
+    items = db.relationship('PathwayItem', back_populates='pathway', lazy='dynamic', 
+                           order_by='PathwayItem.order', cascade='all, delete-orphan')
+    progress = db.relationship('PathwayProgress', back_populates='pathway', 
+                              lazy='dynamic', cascade='all, delete-orphan')
     
     def to_dict(self, include_items=True):
         data = {
@@ -46,14 +43,11 @@ class PathwayItem(db.Model):
     __tablename__ = 'pathway_items'
     
     id = db.Column(db.Integer, primary_key=True)
-    pathway_id = db.Column(db.Integer, db.ForeignKey('pathways.id'), nullable=False)
-    story_id = db.Column(db.Integer, db.ForeignKey('stories.id'), nullable=False)
+    pathway_id = db.Column(db.Integer, db.ForeignKey('pathways.id', ondelete='CASCADE'), nullable=False)
+    story_id = db.Column(db.Integer, db.ForeignKey('stories.id', ondelete='CASCADE'), nullable=False)
     order = db.Column(db.Integer, nullable=False)
-    
-    # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Relationships
     pathway = db.relationship('Pathway', back_populates='items')
     story = db.relationship('Story', back_populates='pathway_items')
     
@@ -68,17 +62,14 @@ class PathwayProgress(db.Model):
     __tablename__ = 'pathway_progress'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    pathway_id = db.Column(db.Integer, db.ForeignKey('pathways.id'), nullable=False)
-    completed_items = db.Column(db.JSON, default=[])  # List of completed story IDs
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    pathway_id = db.Column(db.Integer, db.ForeignKey('pathways.id', ondelete='CASCADE'), nullable=False)
+    completed_items = db.Column(db.JSON, default=list)
     is_completed = db.Column(db.Boolean, default=False)
     completed_at = db.Column(db.DateTime)
-    
-    # Timestamps
     started_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships
     user = db.relationship('User', back_populates='pathway_progress')
     pathway = db.relationship('Pathway', back_populates='progress')
     

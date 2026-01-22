@@ -56,4 +56,11 @@ def create_app(config_class=None):
     app.register_blueprint(analytics.bp, url_prefix='/api/analytics')
     app.register_blueprint(pathways.bp, url_prefix='/api/pathways')
     
+    with app.app_context():
+        try:
+            from app.services.scheduler import init_scheduler
+            init_scheduler(app)
+        except Exception as e:
+            app.logger.error(f"Failed to initialize scheduler: {e}")
+    
     return app
