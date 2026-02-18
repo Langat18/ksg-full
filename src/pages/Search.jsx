@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { fetchStories } from '../services/api';
 import StoryCard from '../components/StoryCard';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -174,10 +175,7 @@ const Search = () => {
         {hasSearched && (
           <>
             {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#235D4C] mx-auto mb-4"></div>
-                <p className="text-gray-600">Searching stories...</p>
-              </div>
+              <SkeletonLoader type="card" count={6} />
             ) : (
               <>
                 {/* Results Header */}

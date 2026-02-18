@@ -2,361 +2,250 @@ from app import db
 from app.models.badge import Badge, UserBadge
 from app.models.user import User
 from app.models.story import Story
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import desc, func
 import logging
 
 logger = logging.getLogger(__name__)
 
+
 class GamificationService:
-    
+
     LEVELS = [
-        {'level': 1, 'min_points': 0, 'max_points': 99, 'name': 'Novice', 'icon': '🌱'},
-        {'level': 2, 'min_points': 100, 'max_points': 249, 'name': 'Explorer', 'icon': '🔍'},
-        {'level': 3, 'min_points': 250, 'max_points': 499, 'name': 'Contributor', 'icon': '✍️'},
-        {'level': 4, 'min_points': 500, 'max_points': 999, 'name': 'Expert', 'icon': '⭐'},
-        {'level': 5, 'min_points': 1000, 'max_points': 1999, 'name': 'Champion', 'icon': '🏆'},
-        {'level': 6, 'min_points': 2000, 'max_points': float('inf'), 'name': 'Legend', 'icon': '👑'}
+        {'level': 1, 'min_points': 0,    'max_points': 99,          'name': 'Novice',      'icon': '🌱'},
+        {'level': 2, 'min_points': 100,  'max_points': 249,         'name': 'Explorer',    'icon': '🔍'},
+        {'level': 3, 'min_points': 250,  'max_points': 499,         'name': 'Contributor', 'icon': '✏️'},
+        {'level': 4, 'min_points': 500,  'max_points': 999,         'name': 'Expert',      'icon': '⭐'},
+        {'level': 5, 'min_points': 1000, 'max_points': 1999,        'name': 'Champion',    'icon': '🏆'},
+        {'level': 6, 'min_points': 2000, 'max_points': float('inf'),'name': 'Legend',      'icon': '👑'},
     ]
-    
+
     POINT_REWARDS = {
-        'story_upload': 20,
-        'story_view': 5,
-        'story_like': 10,
-        'story_share': 15,
-        'pathway_complete': 50,
-        'pathway_start': 5,
-        'profile_complete': 25,
-        'first_story': 30,
-        'comment_create': 5,
-        'daily_login': 2
+        'story_upload':      20,
+        'story_view':         5,
+        'story_like':        10,
+        'story_share':       15,
+        'pathway_complete':  50,
+        'pathway_start':      5,
+        'profile_complete':  25,
+        'first_story':       30,
+        'comment_create':     5,
+        'daily_login':        2,
     }
-    
-    def __init__(self):
-        pass
-    
+
+    def get_user_level(self, points):
+        for lvl in self.LEVELS:
+            if lvl['min_points'] <= points <= lvl['max_points']:
+                return lvl
+        return self.LEVELS[-1]
+
     def award_points(self, user_id, action, points=None):
         try:
             user = User.query.get(user_id)
             if not user:
-                logger.error(f"User {user_id} not found")
                 return False
-            
-            points_to_award = points or self.POINT_REWARDS.get(action, 0)
-            
-            if points_to_award <= 0:
-                logger.warning(f"Invalid points for action '{action}'")
+
+            pts = points or self.POINT_REWARDS.get(action, 0)
+            if pts <= 0:
                 return False
-            
-            old_points = user.points or 0
-            user.points = old_points + points_to_award
-            
-            old_level = self.get_user_level(old_points)['level']
+
+            old_pts   = user.points or 0
+            user.points = old_pts + pts
+            old_level = self.get_user_level(old_pts)['level']
             new_level = self.get_user_level(user.points)['level']
-            
-            level_up = new_level > old_level
-            
             db.session.commit()
-            
-            if level_up:
-                logger.info(f"User {user_id} leveled up from {old_level} to {new_level}")
-            
+
             self.check_and_award_badges(user_id)
-            
+
             return {
-                'points_awarded': points_to_award,
-                'total_points': user.points,
-                'level_up': level_up,
-                'new_level': new_level if level_up else None
+                'points_awarded': pts,
+                'total_points':   user.points,
+                'level_up':       new_level > old_level,
+                'new_level':      new_level if new_level > old_level else None,
             }
-            
         except Exception as e:
             db.session.rollback()
             logger.error(f"Failed to award points to user {user_id}: {e}")
             return False
-    
-    def get_user_level(self, points):
-        for level_data in self.LEVELS:
-            if level_data['min_points'] <= points <= level_data['max_points']:
-                return level_data
-        return self.LEVELS[-1]
-    
+
     def get_user_stats(self, user_id):
         try:
             user = User.query.get(user_id)
             if not user:
                 return None
-            
-            total_points = user.points or 0
-            current_level = self.get_user_level(total_points)
-            
-            next_level = None
-            progress = 0
-            points_needed = 0
-            
-            if current_level['level'] < len(self.LEVELS):
-                next_level_data = self.LEVELS[current_level['level']]
-                next_level = next_level_data['name']
-                points_needed = next_level_data['min_points'] - total_points
-                points_in_current_level = total_points - current_level['min_points']
-                level_range = next_level_data['min_points'] - current_level['min_points']
-                progress = int((points_in_current_level / level_range) * 100) if level_range > 0 else 100
+
+            pts   = user.points or 0
+            cur   = self.get_user_level(pts)
+            idx   = cur['level'] - 1
+
+            if cur['level'] < len(self.LEVELS):
+                nxt          = self.LEVELS[idx + 1]
+                pts_needed   = nxt['min_points'] - pts
+                level_range  = nxt['min_points'] - cur['min_points']
+                progress     = int(((pts - cur['min_points']) / level_range) * 100) if level_range else 100
+                next_name    = nxt['name']
             else:
-                next_level = "Max Level"
-                progress = 100
-                points_needed = 0
-            
-            user_badges = UserBadge.query.filter_by(user_id=user_id).all()
+                pts_needed, progress, next_name = 0, 100, 'Max Level'
+
+            # Single query for badges
+            user_badges = (
+                UserBadge.query
+                .filter_by(user_id=user_id)
+                .join(UserBadge.badge)
+                .all()
+            )
             badges = [
                 {
-                    'id': ub.badge.id,
-                    'name': ub.badge.name,
+                    'id':          ub.badge.id,
+                    'name':        ub.badge.name,
                     'description': ub.badge.description,
-                    'icon': ub.badge.icon,
-                    'earned_at': ub.earned_at.isoformat() if ub.earned_at else None
+                    'icon':        ub.badge.icon,
+                    'earned_at':   ub.earned_at.isoformat() if ub.earned_at else None,
                 }
                 for ub in user_badges
             ]
-            
+
             return {
-                'user_id': user_id,
-                'total_points': total_points,
-                'level': current_level['level'],
-                'level_name': current_level['name'],
-                'level_icon': current_level['icon'],
-                'next_level': next_level,
+                'user_id':                user_id,
+                'total_points':           pts,
+                'level':                  cur['level'],
+                'level_name':             cur['name'],
+                'level_icon':             cur['icon'],
+                'next_level':             next_name,
                 'progress_to_next_level': progress,
-                'points_to_next_level': points_needed,
-                'badges': badges,
-                'badge_count': len(badges)
+                'points_to_next_level':   pts_needed,
+                'badges':                 badges,
+                'badge_count':            len(badges),
             }
-            
         except Exception as e:
             logger.error(f"Failed to get user stats for {user_id}: {e}")
             return None
-    
+
     def check_and_award_badges(self, user_id):
         try:
             user = User.query.get(user_id)
             if not user:
                 return []
-            
+
+            all_badges        = Badge.query.all()
+            existing_ids      = {ub.badge_id for ub in UserBadge.query.filter_by(user_id=user_id).all()}
+            candidates        = [b for b in all_badges if b.id not in existing_ids]
+            if not candidates:
+                return []
+
+            # Pre-fetch aggregates once rather than per-badge
+            story_count = Story.query.filter_by(author_id=user_id, status='published').count()
+            agg = db.session.query(
+                func.coalesce(func.sum(Story.views),  0),
+                func.coalesce(func.sum(Story.likes),  0),
+                func.coalesce(func.sum(Story.shares), 0),
+            ).filter_by(author_id=user_id, status='published').one()
+            total_views, total_likes, total_shares = agg
+
+            pathway_count = user.pathway_progress.filter_by(is_completed=True).count()
+            current_level = self.get_user_level(user.points or 0)['level']
+
+            agg_map = {
+                'stories_uploaded':   story_count,
+                'stories_published':  story_count,
+                'views_received':     total_views,
+                'likes_received':     total_likes,
+                'shares_made':        total_shares,
+                'pathways_completed': pathway_count,
+                'total_points':       user.points or 0,
+                'level_reached':      current_level,
+            }
+
             newly_awarded = []
-            all_badges = Badge.query.all()
-            
-            existing_badge_ids = {ub.badge_id for ub in UserBadge.query.filter_by(user_id=user_id).all()}
-            
-            for badge in all_badges:
-                if badge.id in existing_badge_ids:
-                    continue
-                
-                if self._check_badge_criteria(user, badge):
-                    user_badge = UserBadge(
-                        user_id=user_id,
-                        badge_id=badge.id,
-                        earned_at=datetime.utcnow()
-                    )
-                    
+            for badge in candidates:
+                threshold = agg_map.get(badge.criteria_type)
+                if threshold is not None and threshold >= badge.criteria_value:
+                    db.session.add(UserBadge(
+                        user_id=user_id, badge_id=badge.id, earned_at=datetime.utcnow()
+                    ))
                     if badge.points_value:
                         user.points = (user.points or 0) + badge.points_value
-                    
-                    db.session.add(user_badge)
                     newly_awarded.append(badge)
-            
+
             if newly_awarded:
                 db.session.commit()
                 logger.info(f"Awarded {len(newly_awarded)} badges to user {user_id}")
-            
-            return [
-                {
-                    'id': badge.id,
-                    'name': badge.name,
-                    'description': badge.description,
-                    'icon': badge.icon
-                }
-                for badge in newly_awarded
-            ]
-            
+
+            return [{'id': b.id, 'name': b.name, 'description': b.description, 'icon': b.icon_url} for b in newly_awarded]
+
         except Exception as e:
             db.session.rollback()
             logger.error(f"Failed to check badges for user {user_id}: {e}")
             return []
-    
-    def _check_badge_criteria(self, user, badge):
-        try:
-            criteria_type = badge.criteria_type
-            criteria_value = badge.criteria_value
-            
-            if criteria_type == 'stories_uploaded':
-                count = user.stories.filter_by(status='published').count()
-                return count >= criteria_value
-            
-            elif criteria_type == 'stories_published':
-                count = user.stories.filter_by(status='published').count()
-                return count >= criteria_value
-            
-            elif criteria_type == 'views_received':
-                total_views = db.session.query(func.sum(Story.views)).filter_by(
-                    author_id=user.id,
-                    status='published'
-                ).scalar() or 0
-                return total_views >= criteria_value
-            
-            elif criteria_type == 'likes_received':
-                total_likes = db.session.query(func.sum(Story.likes)).filter_by(
-                    author_id=user.id,
-                    status='published'
-                ).scalar() or 0
-                return total_likes >= criteria_value
-            
-            elif criteria_type == 'pathways_completed':
-                count = user.pathway_progress.filter_by(is_completed=True).count()
-                return count >= criteria_value
-            
-            elif criteria_type == 'total_points':
-                return (user.points or 0) >= criteria_value
-            
-            elif criteria_type == 'level_reached':
-                current_level = self.get_user_level(user.points or 0)['level']
-                return current_level >= criteria_value
-            
-            elif criteria_type == 'shares_made':
-                total_shares = db.session.query(func.sum(Story.shares)).filter_by(
-                    author_id=user.id,
-                    status='published'
-                ).scalar() or 0
-                return total_shares >= criteria_value
-            
-            return False
-            
-        except Exception as e:
-            logger.error(f"Error checking badge criteria: {e}")
-            return False
-    
+
     def get_leaderboard(self, limit=10, timeframe='all'):
         try:
             query = User.query.filter(User.points > 0)
-            
             if timeframe == 'week':
-                from datetime import datetime, timedelta
-                week_ago = datetime.utcnow() - timedelta(days=7)
-                query = query.filter(User.last_login >= week_ago)
+                query = query.filter(User.last_login >= datetime.utcnow() - timedelta(days=7))
             elif timeframe == 'month':
-                from datetime import datetime, timedelta
-                month_ago = datetime.utcnow() - timedelta(days=30)
-                query = query.filter(User.last_login >= month_ago)
-            
+                query = query.filter(User.last_login >= datetime.utcnow() - timedelta(days=30))
+
             users = query.order_by(desc(User.points)).limit(limit).all()
-            
-            leaderboard = []
-            for rank, user in enumerate(users, start=1):
-                level_info = self.get_user_level(user.points or 0)
-                leaderboard.append({
-                    'rank': rank,
-                    'user_id': user.id,
-                    'username': user.username or user.email,
-                    'full_name': user.full_name,
-                    'points': user.points or 0,
-                    'level': level_info['level'],
-                    'level_name': level_info['name'],
-                    'badge_count': UserBadge.query.filter_by(user_id=user.id).count()
-                })
-            
-            return leaderboard
-            
+            if not users:
+                return []
+
+            badge_counts = dict(
+                db.session.query(UserBadge.user_id, func.count(UserBadge.id))
+                .filter(UserBadge.user_id.in_([u.id for u in users]))
+                .group_by(UserBadge.user_id)
+                .all()
+            )
+
+            return [
+                {
+                    'rank':       rank,
+                    'user_id':    u.id,
+                    'username':   u.username or u.email,
+                    'full_name':  u.full_name,
+                    'points':     u.points or 0,
+                    'level':      (lvl := self.get_user_level(u.points or 0))['level'],
+                    'level_name': lvl['name'],
+                    'badge_count': badge_counts.get(u.id, 0),
+                }
+                for rank, u in enumerate(users, 1)
+            ]
         except Exception as e:
             logger.error(f"Failed to get leaderboard: {e}")
             return []
-    
+
     def get_user_rank(self, user_id):
         try:
             user = User.query.get(user_id)
             if not user:
                 return None
-            
-            rank = User.query.filter(User.points > user.points).count() + 1
+            rank        = User.query.filter(User.points > user.points).count() + 1
             total_users = User.query.filter(User.points > 0).count()
-            
             return {
-                'rank': rank,
+                'rank':        rank,
                 'total_users': total_users,
-                'percentile': int(((total_users - rank) / total_users) * 100) if total_users > 0 else 0
+                'percentile':  int(((total_users - rank) / total_users) * 100) if total_users > 0 else 0,
             }
-            
         except Exception as e:
             logger.error(f"Failed to get user rank for {user_id}: {e}")
             return None
-    
+
     def initialize_default_badges(self):
         try:
-            default_badges = [
-                {
-                    'name': 'First Story',
-                    'description': 'Published your first story',
-                    'icon': '📝',
-                    'criteria_type': 'stories_uploaded',
-                    'criteria_value': 1,
-                    'points_value': 30
-                },
-                {
-                    'name': 'Storyteller',
-                    'description': 'Published 10 stories',
-                    'icon': '📚',
-                    'criteria_type': 'stories_uploaded',
-                    'criteria_value': 10,
-                    'points_value': 100
-                },
-                {
-                    'name': 'Popular Creator',
-                    'description': 'Received 100 views',
-                    'icon': '🌟',
-                    'criteria_type': 'views_received',
-                    'criteria_value': 100,
-                    'points_value': 50
-                },
-                {
-                    'name': 'Influencer',
-                    'description': 'Received 1000 views',
-                    'icon': '🔥',
-                    'criteria_type': 'views_received',
-                    'criteria_value': 1000,
-                    'points_value': 200
-                },
-                {
-                    'name': 'Pathway Explorer',
-                    'description': 'Completed your first pathway',
-                    'icon': '🗺️',
-                    'criteria_type': 'pathways_completed',
-                    'criteria_value': 1,
-                    'points_value': 50
-                },
-                {
-                    'name': 'Pathway Master',
-                    'description': 'Completed 5 pathways',
-                    'icon': '🎯',
-                    'criteria_type': 'pathways_completed',
-                    'criteria_value': 5,
-                    'points_value': 150
-                },
-                {
-                    'name': 'Champion',
-                    'description': 'Reached level 5',
-                    'icon': '🏆',
-                    'criteria_type': 'level_reached',
-                    'criteria_value': 5,
-                    'points_value': 100
-                }
+            defaults = [
+                {'name': 'First Story',      'description': 'Published your first story',  'icon': '📝', 'criteria_type': 'stories_uploaded',   'criteria_value': 1,    'points_value': 30},
+                {'name': 'Storyteller',      'description': 'Published 10 stories',         'icon': '📚', 'criteria_type': 'stories_uploaded',   'criteria_value': 10,   'points_value': 100},
+                {'name': 'Popular Creator',  'description': 'Received 100 views',           'icon': '🌟', 'criteria_type': 'views_received',     'criteria_value': 100,  'points_value': 50},
+                {'name': 'Influencer',       'description': 'Received 1000 views',          'icon': '🔥', 'criteria_type': 'views_received',     'criteria_value': 1000, 'points_value': 200},
+                {'name': 'Pathway Explorer', 'description': 'Completed your first pathway', 'icon': '🗺️', 'criteria_type': 'pathways_completed', 'criteria_value': 1,    'points_value': 50},
+                {'name': 'Pathway Master',   'description': 'Completed 5 pathways',         'icon': '🎯', 'criteria_type': 'pathways_completed', 'criteria_value': 5,    'points_value': 150},
+                {'name': 'Champion',         'description': 'Reached level 5',              'icon': '🏆', 'criteria_type': 'level_reached',      'criteria_value': 5,    'points_value': 100},
             ]
-            
-            for badge_data in default_badges:
-                existing = Badge.query.filter_by(name=badge_data['name']).first()
-                if not existing:
-                    badge = Badge(**badge_data)
-                    db.session.add(badge)
-            
+            for bd in defaults:
+                if not Badge.query.filter_by(name=bd['name']).first():
+                    db.session.add(Badge(**bd))
             db.session.commit()
             logger.info("Default badges initialized")
-            
         except Exception as e:
             db.session.rollback()
             logger.error(f"Failed to initialize badges: {e}")

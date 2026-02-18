@@ -29,36 +29,36 @@ const NavBar = () => {
   ];
 
   return (
-    <header className="bg-[#7F622C] fixed top-0 left-0 right-0 z-[100] shadow-lg w-full h-48">
+    <header className="bg-[#7F622C] fixed top-0 left-0 right-0 z-[100] shadow-lg w-full h-20">
       <div className="h-full w-full px-6 lg:px-12">
-        <div className="flex items-center justify-between h-48 gap-8">
+        <div className="flex items-center justify-between h-20 gap-8">
           {/* Logo - Far Left */}
-          <div className="flex-shrink-0 bg-white rounded-lg p-3 shadow-md">
-            <Link to="/" className="flex items-center space-x-3">
+          <div className="flex-shrink-0 bg-white rounded-lg p-2 shadow-md">
+            <Link to="/" className="flex items-center space-x-2">
               <img 
                 src="/assets/logo.png" 
                 alt="KSG Logo" 
-                className="h-32 w-auto" 
+                className="h-14 w-auto" 
                 onError={(e) => e.target.style.display = 'none'} 
               />
               <div className="hidden sm:block">
-                <div className="text-4xl font-bold text-[#7F622C]">
+                <div className="text-lg font-bold text-[#7F622C]">
                   KSG Storytelling
                 </div>
-                <div className="text-sm text-gray-600 -mt-1">
-                  Digital Narratives Platform
+                <div className="text-xs text-gray-600 -mt-0.5">
+                  Digital Narratives
                 </div>
               </div>
             </Link>
           </div>
 
           {/* Desktop Navigation - Center */}
-          <nav className="hidden md:flex items-center flex-grow justify-center space-x-3">
+          <nav className="hidden md:flex items-center flex-grow justify-center space-x-2">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-6 py-4 text-lg font-semibold rounded-lg transition-all duration-200 ${
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
                   isActiveLink(link.path)
                     ? 'text-[#7F622C] bg-[#CBD300]'
                     : 'text-white hover:text-black hover:bg-white'
@@ -71,7 +71,7 @@ const NavBar = () => {
             {isAdmin && (
               <Link
                 to="/admin"
-                className={`px-6 py-4 text-lg font-semibold rounded-lg transition-all duration-200 ${
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
                   isActiveLink('/admin')
                     ? 'text-[#7F622C] bg-[#CBD300]'
                     : 'text-white hover:text-black hover:bg-white'
@@ -88,14 +88,14 @@ const NavBar = () => {
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-white/10 transition-colors"
+                className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-white/10 transition-colors"
                 >
                   <div className="h-8 w-8 bg-[#CBD300] rounded-full flex items-center justify-center">
-                    <span className="text-[#7F622C] font-semibold text-sm">
+                    <span className="text-[#7F622C] font-semibold text-xs">
                       {(user?.full_name || user?.username || 'U').charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <span className="text-white text-sm font-medium hidden lg:block">
+                  <span className="text-white text-xs font-medium hidden lg:inline-block max-w-[100px] truncate">
                     {user?.full_name || user?.username}
                   </span>
                   <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +149,7 @@ const NavBar = () => {
             ) : (
               <Link
                 to="/login"
-                className="px-4 py-2 rounded-md border-2 border-[#CBD300] text-[#7F622C] bg-[#CBD300] hover:bg-[#CBD300]/90 transition-all duration-200"
+                className="px-3 py-2 rounded-md border-2 border-[#CBD300] text-[#7F622C] bg-[#CBD300] hover:bg-[#CBD300]/90 transition-all duration-200 text-sm font-semibold"
               >
                 Login
               </Link>
@@ -163,7 +163,7 @@ const NavBar = () => {
               className="text-white hover:text-[#CBD300] focus:outline-none transition-colors"
             >
               <svg
-                className="h-6 w-6"
+                className="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -190,7 +190,7 @@ const NavBar = () => {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-white/20 bg-[#7F622C] fixed top-24 left-0 right-0 shadow-lg z-[90] max-h-[calc(100vh-6rem)] overflow-y-auto">
+          <div className="md:hidden border-t border-white/20 bg-[#7F622C] fixed top-20 left-0 right-0 shadow-lg z-[90] max-h-[calc(100vh-5rem)] overflow-y-auto">
             <div className="px-4 py-3 space-y-1">
               {navLinks.map((link) => (
                 <Link

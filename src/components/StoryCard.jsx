@@ -1,77 +1,65 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 
-const StoryCard = ({ story }) => {
+const formatDate = (dateObj) => {
+  const days = Math.ceil(Math.abs(new Date() - dateObj) / 864e5);
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 7)  return `${days} days ago`;
+  if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+  return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+const VIDEO_EXTS    = new Set(['mp4', 'webm', 'mov']);
+const AUDIO_EXTS    = new Set(['mp3', 'wav', 'm4a', 'ogg']);
+const DOC_EXTS      = new Set(['pdf', 'doc', 'docx']);
+const IMAGE_EXTS    = new Set(['jpg', 'jpeg', 'png', 'gif']);
+
+const getExt = (url) => url?.split('.').pop().toLowerCase() ?? '';
+
+const getMediaType = (contentType, mediaUrl) => {
+  const t = (contentType || '').toLowerCase();
+  const ext = getExt(mediaUrl);
+  if (t === 'video'    || VIDEO_EXTS.has(ext))  return 'video';
+  if (t === 'audio'    || AUDIO_EXTS.has(ext))  return 'audio';
+  if (t === 'document' || t === 'pdf' || DOC_EXTS.has(ext))   return 'document';
+  if (t === 'image'    || IMAGE_EXTS.has(ext))  return 'image';
+  return t || 'file';
+};
+
+const MEDIA_ICONS = {
+  video: (
+    <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    </svg>
+  ),
+  audio: (
+    <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+    </svg>
+  ),
+  document: (
+    <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  ),
+  image: (
+    <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  ),
+};
+
+const DEFAULT_ICON = (
+  <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+  </svg>
+);
+
+const StoryCard = memo(({ story }) => {
   const date = new Date(story.published_at || story.created_at || Date.now());
   const authorName = story.author?.full_name || story.author?.username || 'KSG Community';
-  
-  const formatDate = (dateObj) => {
-    const now = new Date();
-    const diffTime = Math.abs(now - dateObj);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  const getMediaIcon = (contentType, mediaUrl) => {
-    if (contentType === 'video' || mediaUrl?.includes('.mp4') || mediaUrl?.includes('.webm') || mediaUrl?.includes('.mov')) {
-      return (
-        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-      );
-    }
-    
-    if (contentType === 'audio' || mediaUrl?.includes('.mp3') || mediaUrl?.includes('.wav') || mediaUrl?.includes('.m4a') || mediaUrl?.includes('.ogg')) {
-      return (
-        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-        </svg>
-      );
-    }
-    
-    if (contentType === 'document' || contentType === 'pdf' || mediaUrl?.includes('.pdf') || mediaUrl?.includes('.doc') || mediaUrl?.includes('.docx')) {
-      return (
-        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      );
-    }
-    
-    if (contentType === 'image' || mediaUrl?.includes('.jpg') || mediaUrl?.includes('.png') || mediaUrl?.includes('.jpeg') || mediaUrl?.includes('.gif')) {
-      return (
-        <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      );
-    }
-    
-    return (
-      <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-      </svg>
-    );
-  };
-
-  const getMediaLabel = (contentType, mediaUrl) => {
-    if (contentType === 'video' || mediaUrl?.includes('.mp4') || mediaUrl?.includes('.webm') || mediaUrl?.includes('.mov')) {
-      return 'video';
-    }
-    if (contentType === 'audio' || mediaUrl?.includes('.mp3') || mediaUrl?.includes('.wav') || mediaUrl?.includes('.m4a')) {
-      return 'audio';
-    }
-    if (contentType === 'document' || contentType === 'pdf' || mediaUrl?.includes('.pdf') || mediaUrl?.includes('.doc')) {
-      return 'document';
-    }
-    if (contentType === 'image' || mediaUrl?.includes('.jpg') || mediaUrl?.includes('.png') || mediaUrl?.includes('.jpeg')) {
-      return 'image';
-    }
-    return contentType || 'file';
-  };
+  const mediaType = getMediaType(story.content_type, story.media_url);
 
   return (
     <article className="card-ksg group relative">
@@ -83,9 +71,7 @@ const StoryCard = ({ story }) => {
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-xl font-semibold text-[#1A1A1A] group-hover:text-[#7F622C] transition-colors leading-tight mb-2 line-clamp-2">
-            <Link to={`/story/${story.id}`} className="hover:underline">
-              {story.title}
-            </Link>
+            <Link to={`/story/${story.id}`} className="hover:underline">{story.title}</Link>
           </h3>
           <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
             <div className="flex items-center space-x-1">
@@ -103,18 +89,12 @@ const StoryCard = ({ story }) => {
           </div>
         </div>
       </div>
-      
-      <p className="text-gray-600 leading-relaxed mb-4 line-clamp-3">
-        {story.description}
-      </p>
+
+      <p className="text-gray-600 leading-relaxed mb-4 line-clamp-3">{story.description}</p>
 
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center space-x-2 flex-wrap gap-2">
-          {story.category && (
-            <span className="tag-ksg">
-              {story.category}
-            </span>
-          )}
+          {story.category && <span className="tag-ksg">{story.category}</span>}
           {story.county && story.county !== 'undefined' && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
               <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,16 +105,12 @@ const StoryCard = ({ story }) => {
           )}
           {story.media_url && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
-              {getMediaIcon(story.content_type, story.media_url)}
-              {getMediaLabel(story.content_type, story.media_url)}
+              {MEDIA_ICONS[mediaType] ?? DEFAULT_ICON}
+              {mediaType}
             </span>
           )}
         </div>
-        
-        <Link 
-          to={`/story/${story.id}`} 
-          className="inline-flex items-center text-[#7F622C] hover:text-[#CBD300] font-medium transform transition-all group-hover:translate-x-1"
-        >
+        <Link to={`/story/${story.id}`} className="inline-flex items-center text-[#7F622C] hover:text-[#CBD300] font-medium transform transition-all group-hover:translate-x-1">
           Read Story
           <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -172,9 +148,10 @@ const StoryCard = ({ story }) => {
         </div>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#235D4C] to-[#B5955B] rounded-b-xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#235D4C] to-[#B5955B] rounded-b-xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
     </article>
   );
-};
+});
 
+StoryCard.displayName = 'StoryCard';
 export default StoryCard;

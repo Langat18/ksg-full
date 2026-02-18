@@ -58,7 +58,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <a 
-                  href="#" 
+                  href="https://ksg.ac.ke" 
                   className="text-white/80 hover:text-[#CBD300] transition-colors"
                 >
                   About KSG
@@ -66,7 +66,7 @@ const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="#" 
+                  href="https://ksg.ac.ke/contact/" 
                   className="text-white/80 hover:text-[#CBD300] transition-colors"
                 >
                   Contact Us
@@ -89,7 +89,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <a 
-                  href="#" 
+                  href="https://www.facebook.com/KenyaSchoolofGovernment" 
                   className="text-white/80 hover:text-[#CBD300] transition-colors"
                 >
                   Facebook
@@ -97,7 +97,7 @@ const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="#" 
+                  href="https://x.com/KSGKenya" 
                   className="text-white/80 hover:text-[#CBD300] transition-colors"
                 >
                   Twitter
@@ -105,7 +105,7 @@ const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="#" 
+                  href="https://www.linkedin.com/in/prof-nura-mohamed-ph-d-ebs-12714412a/" 
                   className="text-white/80 hover:text-[#CBD300] transition-colors"
                 >
                   LinkedIn

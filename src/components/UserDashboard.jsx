@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import SkeletonLoader from './SkeletonLoader';
 import axios from 'axios';
 import API_URL from '../config/api';
 
@@ -81,10 +82,7 @@ const UserDashboard = () => {
     return (
       <div className="section-ksg-padding">
         <div className="w-full px-4 lg:px-6">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7F622C] mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading your dashboard...</p>
-          </div>
+          <SkeletonLoader type="dashboard" />
         </div>
       </div>
     );

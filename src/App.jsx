@@ -19,7 +19,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col">
       <NavBar />
-      <main className="pt-48 relative z-[1] flex-grow">
+      <main className="pt-20 relative z-[1] flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/submit" element={<SubmitStory />} />
